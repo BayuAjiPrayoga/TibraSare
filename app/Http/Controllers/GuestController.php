@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\View\View;
-use Illuminate\Http\Request;
 use App\Models\Guest;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class GuestController extends Controller
 {
@@ -13,14 +13,14 @@ class GuestController extends Controller
         $search = request('search');
 
         $query = Guest::withCount('reservations')
-            ->with(['reservations' => function($q) {
+            ->with(['reservations' => function ($q) {
                 $q->latest('check_in_date')->limit(1);
             }]);
 
         if ($search) {
             $query->where('full_name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('phone', 'like', "%{$search}%");
         }
 
         $guests = $query->latest()
@@ -67,9 +67,9 @@ class GuestController extends Controller
     {
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:guests,email,' . $guest->id,
+            'email' => 'required|string|email|max:255|unique:guests,email,'.$guest->id,
             'phone' => 'required|string|max:20',
-            'identity_number' => 'required|string|max:50|unique:guests,identity_number,' . $guest->id,
+            'identity_number' => 'required|string|max:50|unique:guests,identity_number,'.$guest->id,
             'identity_type' => 'required|string|in:KTP,Passport,SIM',
         ]);
 

@@ -2,17 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\View\View;
-use Illuminate\Http\Request;
-use App\Models\RoomCategory;
-use App\Models\Room;
+use App\Enums\ReservationStatus;
+use App\Enums\RoomStatus;
+use App\Mail\ReservationConfirmed;
+use App\Models\ActivityLog;
 use App\Models\Guest;
 use App\Models\Reservation;
-use App\Enums\RoomStatus;
-use App\Enums\ReservationStatus;
-use App\Models\ActivityLog;
-use Carbon\Carbon;
+use App\Models\Room;
+use App\Models\RoomCategory;
+use App\Models\RoomImage;
+use App\Services\WamifyService;
 use App\Services\XenditService;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\View\View;
 
 class BookingController extends Controller
 {
@@ -22,7 +27,7 @@ class BookingController extends Controller
         $availableRoomsCount = $category->rooms()->where('status', RoomStatus::Available)->count();
 
         // Get gallery images from all rooms in this category
-        $galleryImages = \App\Models\RoomImage::whereHas('room', function ($q) use ($category) {
+        $galleryImages = RoomImage::whereHas('room', function ($q) use ($category) {
             $q->where('room_category_id', $category->id);
         })->inRandomOrder()->limit(6)->get();
 
@@ -52,8 +57,8 @@ class BookingController extends Controller
             ->where('status', '!=', RoomStatus::Maintenance)
             ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
                 $query->whereIn('status', [ReservationStatus::Reserved, ReservationStatus::CheckedIn])
-                      ->where('check_in_date', '<', $checkOut)
-                      ->where('check_out_date', '>', $checkIn);
+                    ->where('check_in_date', '<', $checkOut)
+                    ->where('check_out_date', '>', $checkIn);
             })
             ->first();
 
@@ -65,7 +70,7 @@ class BookingController extends Controller
         $guest = null;
 
         try {
-            $reservation = \Illuminate\Support\Facades\DB::transaction(function () use ($user, $validated, $room, $checkIn, $checkOut, &$guest) {
+            $reservation = DB::transaction(function () use ($user, $validated, $room, $checkIn, $checkOut, &$guest) {
                 // Find or update Guest based on authenticated user
                 $guest = Guest::updateOrCreate(
                     ['identity_number' => $validated['identity_number']],
@@ -81,7 +86,7 @@ class BookingController extends Controller
                 $totalPrice = $nights * $room->price;
 
                 $reservation = Reservation::create([
-                    'booking_code' => 'RES-' . strtoupper(uniqid()),
+                    'booking_code' => 'RES-'.strtoupper(uniqid()),
                     'guest_id' => $guest->id,
                     'room_id' => $room->id,
                     'created_by' => $user->id,
@@ -113,16 +118,18 @@ class BookingController extends Controller
         dispatch(function () use ($reservation, $guest, $room, $checkIn, $checkOut) {
             if ($guest && $guest->email) {
                 try {
-                    \Illuminate\Support\Facades\Mail::to($guest->email)->send(new \App\Mail\ReservationConfirmed($reservation));
-                } catch (\Exception $e) {}
+                    Mail::to($guest->email)->send(new ReservationConfirmed($reservation));
+                } catch (\Exception $e) {
+                }
             }
 
             if ($guest && $guest->phone) {
                 try {
-                    $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=" . urlencode($reservation->booking_code);
+                    $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=500x500&data='.urlencode($reservation->booking_code);
                     $caption = "Yth. Bpk/Ibu *{$guest->full_name}*,\n\nTerima kasih telah mempercayakan akomodasi Anda di *Tibra Sare Hotel*. Kami dengan senang hati mengonfirmasi reservasi Anda dengan rincian sebagai berikut:\n\n*Kode Booking*: {$reservation->booking_code}\n*Kamar*: {$room->room_number} ({$room->category->name})\n*Check-In*: {$checkIn->format('d M Y')}\n*Check-Out*: {$checkOut->format('d M Y')}\n\nSelesaikan pembayaran Anda segera untuk mengamankan pesanan ini.\n\nSalam hangat,\n*Manajemen Tibra Sare Hotel*";
-                    \App\Services\WamifyService::sendMediaMessage($guest->phone, $qrUrl, $caption);
-                } catch (\Exception $e) {}
+                    WamifyService::sendMediaMessage($guest->phone, $qrUrl, $caption);
+                } catch (\Exception $e) {
+                }
             }
         })->afterResponse();
 
@@ -131,7 +138,7 @@ class BookingController extends Controller
         $invoice = $xenditService->createInvoice([
             'external_id' => $reservation->booking_code,
             'amount' => $reservation->total_price,
-            'description' => 'Reservasi Kamar ' . $room->room_number . ' (' . $room->category->name . ')',
+            'description' => 'Reservasi Kamar '.$room->room_number.' ('.$room->category->name.')',
             'payer_email' => $guest->email,
             'customer_name' => $guest->full_name,
             'customer_phone' => $guest->phone,
@@ -139,6 +146,7 @@ class BookingController extends Controller
 
         if ($invoice && isset($invoice['invoice_url'])) {
             $reservation->update(['payment_url' => $invoice['invoice_url']]);
+
             return redirect($invoice['invoice_url']);
         }
 

@@ -53,16 +53,16 @@ return [
     ],
 
     'room_status' => [
-        'available'   => ['label' => 'Tersedia',     'color' => 'success',     'dot_class' => 'status-dot-available'],
-        'occupied'    => ['label' => 'Terisi',        'color' => 'destructive', 'dot_class' => 'status-dot-occupied'],
-        'reserved'    => ['label' => 'Dipesan',       'color' => 'warning',     'dot_class' => 'status-dot-reserved'],
+        'available' => ['label' => 'Tersedia',     'color' => 'success',     'dot_class' => 'status-dot-available'],
+        'occupied' => ['label' => 'Terisi',        'color' => 'destructive', 'dot_class' => 'status-dot-occupied'],
+        'reserved' => ['label' => 'Dipesan',       'color' => 'warning',     'dot_class' => 'status-dot-reserved'],
         'maintenance' => ['label' => 'Maintenance',   'color' => 'muted',       'dot_class' => 'status-dot-maintenance'],
     ],
 
     'reservation_status' => [
-        'reserved'    => ['label' => 'Menunggu',    'color' => 'warning'],
-        'checked_in'  => ['label' => 'In House',    'color' => 'success'],
+        'reserved' => ['label' => 'Menunggu',    'color' => 'warning'],
+        'checked_in' => ['label' => 'In House',    'color' => 'success'],
         'checked_out' => ['label' => 'Selesai',     'color' => 'muted'],
-        'cancelled'   => ['label' => 'Dibatalkan',  'color' => 'destructive'],
+        'cancelled' => ['label' => 'Dibatalkan',  'color' => 'destructive'],
     ],
 ];

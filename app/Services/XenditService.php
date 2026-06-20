@@ -17,13 +17,13 @@ class XenditService
     /**
      * Create a Xendit Invoice
      *
-     * @param array $params
      * @return array|null
      */
     public function createInvoice(array $params)
     {
         if (empty($this->secretKey)) {
             Log::error('Xendit Secret Key is not set.');
+
             return null;
         }
 
@@ -58,13 +58,14 @@ class XenditService
 
             Log::error('Xendit Create Invoice Failed', [
                 'response' => $response->json(),
-                'status' => $response->status()
+                'status' => $response->status(),
             ]);
 
             return null;
 
         } catch (\Exception $e) {
             Log::error('Xendit Create Invoice Exception', ['message' => $e->getMessage()]);
+
             return null;
         }
     }

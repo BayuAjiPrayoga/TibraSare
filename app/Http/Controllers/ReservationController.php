@@ -2,11 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\View\View;
-use Illuminate\Http\Request;
+use App\Enums\ReservationStatus;
+use App\Enums\RoomStatus;
+use App\Mail\ReservationCancelled;
+use App\Mail\ReservationConfirmed;
+use App\Models\ActivityLog;
+use App\Models\Guest;
 use App\Models\Reservation;
 use App\Models\Room;
 use App\Services\XenditService;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\View\View;
 
 class ReservationController extends Controller
 {
@@ -18,9 +26,9 @@ class ReservationController extends Controller
 
         if ($search) {
             $query->where('booking_code', 'like', "%{$search}%")
-                  ->orWhereHas('guest', function ($q) use ($search) {
-                      $q->where('full_name', 'like', "%{$search}%");
-                  });
+                ->orWhereHas('guest', function ($q) use ($search) {
+                    $q->where('full_name', 'like', "%{$search}%");
+                });
         }
 
         $reservations = $query->paginate(12)->withQueryString()->through(function ($res) {
@@ -39,7 +47,7 @@ class ReservationController extends Controller
                     'category' => [
                         'name' => $res->room->category->name,
                     ],
-                ]
+                ],
             ];
         });
 
@@ -58,11 +66,11 @@ class ReservationController extends Controller
                 'price' => (int) $room->price,
                 'category' => [
                     'name' => $room->category->name,
-                ]
+                ],
             ];
         });
 
-        $guests = \App\Models\Guest::select('id', 'full_name', 'email', 'phone')->get();
+        $guests = Guest::select('id', 'full_name', 'email', 'phone')->get();
 
         return view('reservations.create', [
             'availableRooms' => $availableRooms,
@@ -73,6 +81,7 @@ class ReservationController extends Controller
     public function show(Reservation $reservation): View
     {
         $reservation->load(['guest', 'room.category', 'creator']);
+
         return view('reservations.show', [
             'reservation' => $reservation,
         ]);
@@ -84,7 +93,7 @@ class ReservationController extends Controller
             'room_id' => 'required|exists:rooms,id',
             'check_in_date' => 'required|date|after_or_equal:today',
             'check_out_date' => 'required|date|after:check_in_date',
-            
+
             // Guest data (either existing guest_id OR new guest data)
             'guest_id' => 'nullable|exists:guests,id',
             'full_name' => 'required_without:guest_id|string|max:255',
@@ -96,7 +105,7 @@ class ReservationController extends Controller
 
         // Get or Create Guest
         if (empty($validated['guest_id'])) {
-            $guest = \App\Models\Guest::firstOrCreate(
+            $guest = Guest::firstOrCreate(
                 ['identity_number' => $validated['identity_number']],
                 [
                     'full_name' => $validated['full_name'],
@@ -110,14 +119,14 @@ class ReservationController extends Controller
         }
 
         $room = Room::findOrFail($validated['room_id']);
-        
-        $checkIn = \Carbon\Carbon::parse($validated['check_in_date']);
-        $checkOut = \Carbon\Carbon::parse($validated['check_out_date']);
+
+        $checkIn = Carbon::parse($validated['check_in_date']);
+        $checkOut = Carbon::parse($validated['check_out_date']);
         $nights = $checkIn->diffInDays($checkOut);
         $totalPrice = $nights * $room->price;
 
         $reservation = Reservation::create([
-            'booking_code' => 'RES-' . strtoupper(uniqid()),
+            'booking_code' => 'RES-'.strtoupper(uniqid()),
             'guest_id' => $guestId,
             'room_id' => $room->id,
             'created_by' => auth()->id(),
@@ -125,13 +134,13 @@ class ReservationController extends Controller
             'check_out_date' => $checkOut,
             'nights' => $nights,
             'total_price' => $totalPrice,
-            'status' => \App\Enums\ReservationStatus::Reserved,
+            'status' => ReservationStatus::Reserved,
         ]);
 
-        $room->update(['status' => \App\Enums\RoomStatus::Reserved]);
+        $room->update(['status' => RoomStatus::Reserved]);
 
         // Log Activity
-        \App\Models\ActivityLog::create([
+        ActivityLog::create([
             'user_id' => auth()->id(),
             'action' => "Membuat reservasi baru ({$reservation->booking_code}) untuk tamu {$reservation->guest->full_name}.",
             'ip_address' => $request->ip(),
@@ -141,7 +150,7 @@ class ReservationController extends Controller
         if ($reservation->guest->email) {
             dispatch(function () use ($reservation) {
                 try {
-                    \Illuminate\Support\Facades\Mail::to($reservation->guest->email)->send(new \App\Mail\ReservationConfirmed($reservation));
+                    Mail::to($reservation->guest->email)->send(new ReservationConfirmed($reservation));
                 } catch (\Exception $e) {
                     // Log email error if needed, but don't fail the reservation
                 }
@@ -150,12 +159,12 @@ class ReservationController extends Controller
 
         // --- XENDIT INTEGRATION ---
         $xenditService = new XenditService();
-        $guestObj = \App\Models\Guest::find($guestId);
-        
+        $guestObj = Guest::find($guestId);
+
         $invoice = $xenditService->createInvoice([
             'external_id' => $reservation->booking_code,
             'amount' => $reservation->total_price,
-            'description' => 'Reservasi Kamar ' . $room->room_number . ' (' . $room->category->name . ')',
+            'description' => 'Reservasi Kamar '.$room->room_number.' ('.$room->category->name.')',
             'payer_email' => $guestObj->email,
             'customer_name' => $guestObj->full_name,
             'customer_phone' => $guestObj->phone,
@@ -163,6 +172,7 @@ class ReservationController extends Controller
 
         if ($invoice && isset($invoice['invoice_url'])) {
             $reservation->update(['payment_url' => $invoice['invoice_url']]);
+
             return redirect($invoice['invoice_url']);
         }
 
@@ -176,19 +186,19 @@ class ReservationController extends Controller
             return back()->with('error', 'Anda tidak berhak membatalkan reservasi ini.');
         }
 
-        if ($reservation->status !== \App\Enums\ReservationStatus::Reserved) {
+        if ($reservation->status !== ReservationStatus::Reserved) {
             return back()->with('error', 'Hanya reservasi dengan status "Dipesan" yang dapat dibatalkan.');
         }
 
-        $reservation->update(['status' => \App\Enums\ReservationStatus::Cancelled]);
+        $reservation->update(['status' => ReservationStatus::Cancelled]);
 
         // Jika kamar belum check-in hari ini, bebaskan status kamar
-        if ($reservation->room->status === \App\Enums\RoomStatus::Reserved) {
-            $reservation->room->update(['status' => \App\Enums\RoomStatus::Available]);
+        if ($reservation->room->status === RoomStatus::Reserved) {
+            $reservation->room->update(['status' => RoomStatus::Available]);
         }
 
         // Log Activity
-        \App\Models\ActivityLog::create([
+        ActivityLog::create([
             'user_id' => auth()->id(),
             'action' => "Membatalkan reservasi ({$reservation->booking_code}).",
             'ip_address' => $request->ip(),
@@ -198,7 +208,7 @@ class ReservationController extends Controller
         if ($reservation->guest->email) {
             dispatch(function () use ($reservation) {
                 try {
-                    \Illuminate\Support\Facades\Mail::to($reservation->guest->email)->send(new \App\Mail\ReservationCancelled($reservation));
+                    Mail::to($reservation->guest->email)->send(new ReservationCancelled($reservation));
                 } catch (\Exception $e) {
                     // Ignore email error
                 }

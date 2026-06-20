@@ -2,18 +2,18 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use App\Models\RoomCategory;
-use App\Models\Room;
+use App\Enums\ReservationStatus;
+use App\Enums\RoomStatus;
+use App\Enums\UserRole;
+use App\Models\ActivityLog;
 use App\Models\Guest;
 use App\Models\Reservation;
-use App\Models\ActivityLog;
-use App\Enums\UserRole;
-use App\Enums\RoomStatus;
-use App\Enums\ReservationStatus;
+use App\Models\Room;
+use App\Models\RoomCategory;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
 
 class DatabaseSeeder extends Seeder
 {
@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
             'role' => UserRole::Admin,
             'email_verified_at' => now(),
         ]);
-        
+
         $receptionist = User::updateOrCreate(['email' => 'receptionist@tibrasare.test'], [
             'name' => 'Resepsionis 1',
             'password' => Hash::make('password'),
@@ -39,7 +39,7 @@ class DatabaseSeeder extends Seeder
             'description' => 'Kamar standar untuk 2 orang.',
             'base_price' => 250000,
         ]);
-        
+
         $deluxe = RoomCategory::firstOrCreate(['name' => 'Deluxe'], [
             'description' => 'Kamar lebih luas dengan pemandangan.',
             'base_price' => 450000,

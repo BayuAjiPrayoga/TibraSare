@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Models\Reservation;
 use App\Models\ActivityLog;
+use App\Models\Reservation;
 
 class ReservationObserver
 {
@@ -15,7 +15,9 @@ class ReservationObserver
     public function updated(Reservation $reservation): void
     {
         $changes = $reservation->getChanges();
-        if (empty($changes)) return;
+        if (empty($changes)) {
+            return;
+        }
         ActivityLog::log('Update Reservation', "Mengubah status/data reservasi {$reservation->booking_code}", $changes);
     }
 

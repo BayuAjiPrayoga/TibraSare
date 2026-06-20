@@ -2,18 +2,18 @@
 
 namespace App\Mail;
 
+use App\Models\Reservation;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Reservation;
 
 class CheckOutNotification extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     public $reservation;
 
@@ -31,7 +31,7 @@ class CheckOutNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Terima Kasih Atas Kunjungan Anda - ' . ($this->reservation->booking_code ?? 'Tibra Sare Hotel'),
+            subject: 'Terima Kasih Atas Kunjungan Anda - '.($this->reservation->booking_code ?? 'Tibra Sare Hotel'),
         );
     }
 

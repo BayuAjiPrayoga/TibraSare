@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Models\Guest;
 use App\Models\ActivityLog;
+use App\Models\Guest;
 
 class GuestObserver
 {
@@ -15,7 +15,9 @@ class GuestObserver
     public function updated(Guest $guest): void
     {
         $changes = $guest->getChanges();
-        if (empty($changes)) return;
+        if (empty($changes)) {
+            return;
+        }
         ActivityLog::log('Update Guest', "Mengubah data tamu {$guest->full_name}", $changes);
     }
 

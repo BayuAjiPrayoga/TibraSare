@@ -2,11 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\RoomCategory;
-use App\Models\Room;
-use App\Models\RoomImage;
+use App\Enums\RoomStatus;
 use App\Models\Facility;
+use App\Models\Room;
+use App\Models\RoomCategory;
+use App\Models\RoomImage;
+use Illuminate\Database\Seeder;
 
 class SundaTibraSareSeeder extends Seeder
 {
@@ -51,7 +52,7 @@ class SundaTibraSareSeeder extends Seeder
                 'base_price' => 1850000,
                 'image_path' => 'room_categories/puri_parahyangan.png',
                 'facilities' => ['WiFi Gratis', 'AC', 'TV Kabel', 'Kamar Mandi Alam', 'Sarapan Tradisional', 'Private Pool', 'Balkon Pemandangan'],
-            ]
+            ],
         ];
 
         foreach ($categories as $index => $catData) {
@@ -68,10 +69,10 @@ class SundaTibraSareSeeder extends Seeder
             for ($i = 1; $i <= $roomCount; $i++) {
                 $room = Room::create([
                     'room_category_id' => $category->id,
-                    'room_number' => $prefix . (100 + $i),
+                    'room_number' => $prefix.(100 + $i),
                     'price' => $category->base_price,
-                    'status' => \App\Enums\RoomStatus::Available,
-                    'description' => 'Kamar ' . $category->name . ' nomor ' . (100 + $i),
+                    'status' => RoomStatus::Available,
+                    'description' => 'Kamar '.$category->name.' nomor '.(100 + $i),
                 ]);
 
                 // Sync Facilities

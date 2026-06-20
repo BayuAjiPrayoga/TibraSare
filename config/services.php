@@ -46,4 +46,14 @@ return [
         'webhook_token' => env('XENDIT_WEBHOOK_TOKEN'),
     ],
 
+    'wamify' => [
+        'token' => env('WAMIFY_TOKEN'),
+        'session_id' => env('WAMIFY_SESSION_ID'),
+    ],
+
+    'hotel' => [
+        'wifi_ssid' => env('WIFI_SSID', 'Tibra Sare Guest'),
+        'wifi_password' => env('WIFI_PASSWORD', 'Tibrasare123'),
+    ],
+
 ];

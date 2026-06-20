@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Models\Room;
 use App\Models\ActivityLog;
+use App\Models\Room;
 
 class RoomObserver
 {
@@ -15,7 +15,9 @@ class RoomObserver
     public function updated(Room $room): void
     {
         $changes = $room->getChanges();
-        if (empty($changes)) return;
+        if (empty($changes)) {
+            return;
+        }
         ActivityLog::log('Update Room', "Mengubah data kamar {$room->room_number}", $changes);
     }
 

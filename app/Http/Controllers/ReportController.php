@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\View\View;
 use App\Models\Reservation;
 use Carbon\Carbon;
+use Illuminate\View\View;
 
 class ReportController extends Controller
 {
@@ -12,12 +12,12 @@ class ReportController extends Controller
     {
         // Dummy logic for MVP, normally this would group by month
         $monthlyRevenue = Reservation::whereYear('created_at', Carbon::now()->year)
-                                     ->where('payment_status', 'PAID')
-                                     ->sum('total_price');
+            ->where('payment_status', 'PAID')
+            ->sum('total_price');
 
         $totalReservations = Reservation::whereYear('created_at', Carbon::now()->year)
-                                        ->count();
-                                        
+            ->count();
+
         $reportData = Reservation::with(['guest', 'room.category'])
             ->latest()
             ->take(50) // Limit to latest 50 for the report MVP

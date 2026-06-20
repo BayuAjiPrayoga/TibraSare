@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\View\View;
-use Illuminate\Http\Request;
 use App\Models\Facility;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class FacilityController extends Controller
 {
@@ -16,7 +16,7 @@ class FacilityController extends Controller
 
         if ($search) {
             $query->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                ->orWhere('description', 'like', "%{$search}%");
         }
 
         $facilities = $query->paginate(12)->withQueryString()->through(function ($facility) {
@@ -47,7 +47,7 @@ class FacilityController extends Controller
     public function update(Request $request, Facility $facility)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:facilities,name,' . $facility->id,
+            'name' => 'required|string|max:255|unique:facilities,name,'.$facility->id,
             'description' => 'nullable|string',
         ]);
 

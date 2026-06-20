@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\View\View;
 use App\Models\RoomCategory;
-use Illuminate\Support\Facades\Storage;
-
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 
 class RoomCategoryController extends Controller
 {
@@ -18,7 +17,7 @@ class RoomCategoryController extends Controller
 
         if ($search) {
             $query->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                ->orWhere('description', 'like', "%{$search}%");
         }
 
         $categories = $query->paginate(12)
@@ -31,7 +30,7 @@ class RoomCategoryController extends Controller
                     'image_path' => $category->image_path ? Storage::url($category->image_path) : null,
                     'base_price' => (int) $category->base_price,
                     'total_rooms' => $category->rooms_count,
-                    'facilities' => [], 
+                    'facilities' => [],
                 ];
             });
 
@@ -61,7 +60,7 @@ class RoomCategoryController extends Controller
     public function update(Request $request, RoomCategory $roomCategory)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:room_categories,name,' . $roomCategory->id,
+            'name' => 'required|string|max:255|unique:room_categories,name,'.$roomCategory->id,
             'description' => 'nullable|string',
             'base_price' => 'required|numeric|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',

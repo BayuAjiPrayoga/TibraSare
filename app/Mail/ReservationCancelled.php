@@ -2,18 +2,18 @@
 
 namespace App\Mail;
 
+use App\Models\Reservation;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Reservation;
 
 class ReservationCancelled extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     public $reservation;
 
@@ -31,7 +31,7 @@ class ReservationCancelled extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Pembatalan Reservasi - ' . $this->reservation->booking_code,
+            subject: 'Pembatalan Reservasi - '.$this->reservation->booking_code,
         );
     }
 

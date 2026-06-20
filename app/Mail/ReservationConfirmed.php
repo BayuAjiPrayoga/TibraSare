@@ -2,18 +2,19 @@
 
 namespace App\Mail;
 
+use App\Models\Reservation;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Reservation;
 
 class ReservationConfirmed extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     public $reservation;
 
@@ -31,7 +32,7 @@ class ReservationConfirmed extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Konfirmasi Reservasi Tibra Sare Hotel - ' . $this->reservation->booking_code,
+            subject: 'Konfirmasi Reservasi Tibra Sare Hotel - '.$this->reservation->booking_code,
         );
     }
 
@@ -48,15 +49,15 @@ class ReservationConfirmed extends Mailable
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @return array<int, Attachment>
      */
     public function attachments(): array
     {
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.invoice', ['reservation' => $this->reservation]);
-        
+        $pdf = Pdf::loadView('pdf.invoice', ['reservation' => $this->reservation]);
+
         return [
-            Attachment::fromData(fn () => $pdf->output(), 'Invoice_' . $this->reservation->booking_code . '.pdf')
-                    ->withMime('application/pdf'),
+            Attachment::fromData(fn () => $pdf->output(), 'Invoice_'.$this->reservation->booking_code.'.pdf')
+                ->withMime('application/pdf'),
         ];
     }
 }

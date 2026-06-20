@@ -2,19 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\View\View;
-use App\Models\Room;
+use App\Enums\ReservationStatus;
+use App\Enums\RoomStatus;
+use App\Enums\UserRole;
+use App\Models\ActivityLog;
 use App\Models\Guest;
 use App\Models\Reservation;
-use App\Models\ActivityLog;
-use App\Enums\RoomStatus;
-use App\Enums\ReservationStatus;
+use App\Models\Room;
+use App\Models\RoomCategory;
+use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
     public function index(): View
     {
-        if (auth()->user()->role->value === \App\Enums\UserRole::Guest->value) {
+        if (auth()->user()->role->value === UserRole::Guest->value) {
             $myReservations = Reservation::with('room.category')
                 ->where('created_by', auth()->id())
                 ->latest()
@@ -34,17 +36,17 @@ class DashboardController extends Controller
                             'category' => [
                                 'name' => $res->room->category->name,
                             ],
-                        ]
+                        ],
                     ];
                 });
-            $roomCategories = \App\Models\RoomCategory::withCount(['rooms as available_rooms_count' => function ($query) {
-                    $query->where('status', \App\Enums\RoomStatus::Available);
-                }])
+            $roomCategories = RoomCategory::withCount(['rooms as available_rooms_count' => function ($query) {
+                $query->where('status', RoomStatus::Available);
+            }])
                 ->get();
 
             return view('guest.dashboard', [
                 'reservations' => $myReservations,
-                'roomCategories' => $roomCategories
+                'roomCategories' => $roomCategories,
             ]);
         }
 
@@ -52,10 +54,10 @@ class DashboardController extends Controller
         $availableRooms = Room::where('status', RoomStatus::Available)->count();
         $occupiedRooms = Room::where('status', RoomStatus::Occupied)->count();
         $totalGuests = Guest::count();
-        
+
         $totalReservations = Reservation::whereIn('status', [
-            ReservationStatus::Reserved, 
-            ReservationStatus::CheckedIn
+            ReservationStatus::Reserved,
+            ReservationStatus::CheckedIn,
         ])->count();
 
         $recentActivities = ActivityLog::with('user')
@@ -73,14 +75,14 @@ class DashboardController extends Controller
         // Revenue Chart Data (Last 6 Months)
         $revenueData = collect(range(5, 0))->map(function ($i) {
             $date = now()->subMonths($i);
-            $total = \App\Models\Reservation::whereMonth('created_at', $date->month)
+            $total = Reservation::whereMonth('created_at', $date->month)
                 ->whereYear('created_at', $date->year)
                 ->where('payment_status', 'PAID')
                 ->sum('total_price');
-                
+
             return [
                 'month' => $date->format('M'),
-                'revenue' => (float) $total
+                'revenue' => (float) $total,
             ];
         });
 

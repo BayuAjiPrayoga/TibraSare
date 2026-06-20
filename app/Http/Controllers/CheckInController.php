@@ -2,17 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\View\View;
-use App\Models\Reservation;
 use App\Enums\ReservationStatus;
+use App\Enums\RoomStatus;
+use App\Mail\CheckInNotification;
+use App\Models\ActivityLog;
+use App\Models\Reservation;
+use App\Services\WamifyService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\View\View;
 
 class CheckInController extends Controller
 {
     public function index(): View
     {
         $today = Carbon::today();
-        
+
         $reservations = Reservation::with(['guest', 'room.category'])
             ->whereIn('status', [ReservationStatus::Reserved])
             ->whereDate('check_in_date', '<=', $today)
@@ -33,7 +38,7 @@ class CheckInController extends Controller
                         'category' => [
                             'name' => $res->room->category->name,
                         ],
-                    ]
+                    ],
                 ];
             });
 
@@ -54,10 +59,10 @@ class CheckInController extends Controller
         ]);
 
         $reservation->room->update([
-            'status' => \App\Enums\RoomStatus::Occupied,
+            'status' => RoomStatus::Occupied,
         ]);
 
-        \App\Models\ActivityLog::create([
+        ActivityLog::create([
             'user_id' => auth()->id(),
             'action' => 'Check In',
             'description' => "Memproses check-in untuk reservasi {$reservation->booking_code}.",
@@ -65,13 +70,13 @@ class CheckInController extends Controller
         ]);
 
         $hasWifi = $reservation->room->facilities()->where('name', 'like', '%Wifi%')->exists();
-        $wifiSsid = env('WIFI_SSID', 'Tibra Sare Guest');
-        $wifiPass = env('WIFI_PASSWORD', 'Tibrasare123');
+        $wifiSsid = config('services.hotel.wifi_ssid');
+        $wifiPass = config('services.hotel.wifi_password');
 
         dispatch(function () use ($reservation, $hasWifi, $wifiSsid, $wifiPass) {
             if ($reservation->guest->email) {
                 try {
-                    \Illuminate\Support\Facades\Mail::to($reservation->guest->email)->send(new \App\Mail\CheckInNotification($reservation, $hasWifi, $wifiSsid, $wifiPass));
+                    Mail::to($reservation->guest->email)->send(new CheckInNotification($reservation, $hasWifi, $wifiSsid, $wifiPass));
                 } catch (\Exception $e) {
                     // Ignore email failure
                 }
@@ -79,10 +84,11 @@ class CheckInController extends Controller
 
             if ($reservation->guest->phone) {
                 try {
-                    $wifiInfoWa = $hasWifi ? "\n\nSebagai informasi tambahan, kamar Anda dilengkapi dengan fasilitas Wi-Fi. Berikut detail aksesnya:\n*Nama Wi-Fi (SSID)*: {$wifiSsid}\n*Kata Sandi*: {$wifiPass}" : "";
+                    $wifiInfoWa = $hasWifi ? "\n\nSebagai informasi tambahan, kamar Anda dilengkapi dengan fasilitas Wi-Fi. Berikut detail aksesnya:\n*Nama Wi-Fi (SSID)*: {$wifiSsid}\n*Kata Sandi*: {$wifiPass}" : '';
                     $message = "Yth. Bpk/Ibu *{$reservation->guest->full_name}*,\n\nSelamat datang di *Tibra Sare Hotel*.\n\nKami menginformasikan bahwa proses Check-In Anda dengan Kode Reservasi *{$reservation->booking_code}* telah berhasil dilakukan. Anda menempati kamar *{$reservation->room->room_number}*.\n\nFasilitas kami sepenuhnya tersedia untuk Anda.{$wifiInfoWa}\n\nApabila Anda membutuhkan bantuan atau layanan tambahan selama menginap, staf kami siap membantu Anda 24 jam.\n\nSelamat beristirahat dan nikmati pengalaman menginap Anda bersama kami.\n\nSalam hangat,\n*Manajemen Tibra Sare Hotel*";
-                    \App\Services\WamifyService::sendMessage($reservation->guest->phone, $message);
-                } catch (\Exception $e) {}
+                    WamifyService::sendMessage($reservation->guest->phone, $message);
+                } catch (\Exception $e) {
+                }
             }
         })->afterResponse();
 

@@ -13,24 +13,24 @@ class GoogleAuthServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_google_user_is_created_as_receptionist_with_verified_email(): void
+    public function test_google_user_is_created_as_guest_with_verified_email(): void
     {
         $service = app(GoogleAuthService::class);
 
         $user = $service->findOrCreateUser(new FakeGoogleUser(
             id: 'google-123',
-            name: 'Google Receptionist',
+            name: 'Google Guest',
             email: 'google@example.com',
         ));
 
         $this->assertDatabaseHas('users', [
             'email' => 'google@example.com',
             'google_id' => 'google-123',
-            'role' => UserRole::Receptionist->value,
+            'role' => UserRole::Guest->value,
         ]);
 
         $this->assertTrue($user->email_verified_at->isPast() || $user->email_verified_at->isCurrentSecond());
-        $this->assertSame(UserRole::Receptionist, $user->role);
+        $this->assertSame(UserRole::Guest, $user->role);
     }
 
     public function test_existing_user_is_linked_to_google_account_by_email(): void

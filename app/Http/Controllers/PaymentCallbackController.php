@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Reservation;
 use App\Enums\ReservationStatus;
 use App\Enums\RoomStatus;
+use App\Mail\PaymentSuccess;
+use App\Mail\ReservationCancelled;
+use App\Models\Reservation;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PaymentCallbackController extends Controller
 {
@@ -20,6 +25,7 @@ class PaymentCallbackController extends Controller
 
         if (!empty($xenditToken) && $callbackToken !== $xenditToken) {
             Log::warning('Xendit Callback - Invalid Token', ['ip' => $request->ip()]);
+
             return response()->json(['status' => 'Bad Signature'], 403);
         }
 
@@ -30,17 +36,18 @@ class PaymentCallbackController extends Controller
 
         if (!$reservation) {
             Log::error('Xendit Callback - Reservation Not Found', ['order' => $externalId]);
+
             return response()->json(['status' => 'Not Found'], 404);
         }
 
         if ($status === 'PAID' || $status === 'SETTLED') {
             // Generate QR Code
-            $qrCodeFileName = 'qrcodes/' . $reservation->booking_code . '.png';
-            if (!\Illuminate\Support\Facades\Storage::disk('public')->exists('qrcodes')) {
-                \Illuminate\Support\Facades\Storage::disk('public')->makeDirectory('qrcodes');
+            $qrCodeFileName = 'qrcodes/'.$reservation->booking_code.'.png';
+            if (!Storage::disk('public')->exists('qrcodes')) {
+                Storage::disk('public')->makeDirectory('qrcodes');
             }
-            $qrImage = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')->size(300)->generate($reservation->booking_code);
-            \Illuminate\Support\Facades\Storage::disk('public')->put($qrCodeFileName, $qrImage);
+            $qrImage = QrCode::format('png')->size(300)->generate($reservation->booking_code);
+            Storage::disk('public')->put($qrCodeFileName, $qrImage);
 
             $reservation->update([
                 'payment_status' => 'PAID',
@@ -52,9 +59,9 @@ class PaymentCallbackController extends Controller
             if ($reservation->guest && $reservation->guest->email) {
                 dispatch(function () use ($reservation) {
                     try {
-                        \Illuminate\Support\Facades\Mail::to($reservation->guest->email)->send(new \App\Mail\PaymentSuccess($reservation));
+                        Mail::to($reservation->guest->email)->send(new PaymentSuccess($reservation));
                     } catch (\Exception $e) {
-                        Log::error('Failed to send PaymentSuccess email: ' . $e->getMessage());
+                        Log::error('Failed to send PaymentSuccess email: '.$e->getMessage());
                     }
                 })->afterResponse();
             }
@@ -72,12 +79,13 @@ class PaymentCallbackController extends Controller
                 }
 
                 Log::info("Reservation {$externalId} automatically CANCELLED due to payment expiry.");
-                
+
                 // Optional: Send cancel email
                 if ($reservation->guest->email) {
                     try {
-                        \Illuminate\Support\Facades\Mail::to($reservation->guest->email)->send(new \App\Mail\ReservationCancelled($reservation));
-                    } catch (\Exception $e) {}
+                        Mail::to($reservation->guest->email)->send(new ReservationCancelled($reservation));
+                    } catch (\Exception $e) {
+                    }
                 }
             }
         }

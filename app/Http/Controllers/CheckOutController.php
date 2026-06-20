@@ -2,17 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\View\View;
-use App\Models\Reservation;
 use App\Enums\ReservationStatus;
+use App\Enums\RoomStatus;
+use App\Mail\CheckOutNotification;
+use App\Models\ActivityLog;
+use App\Models\Reservation;
+use App\Services\WamifyService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\View\View;
 
 class CheckOutController extends Controller
 {
     public function index(): View
     {
         $today = Carbon::today();
-        
+
         $reservations = Reservation::with(['guest', 'room.category'])
             ->where('status', ReservationStatus::CheckedIn)
             ->whereDate('check_out_date', '<=', $today)
@@ -33,7 +38,7 @@ class CheckOutController extends Controller
                         'category' => [
                             'name' => $res->room->category->name,
                         ],
-                    ]
+                    ],
                 ];
             });
 
@@ -54,10 +59,10 @@ class CheckOutController extends Controller
         ]);
 
         $reservation->room->update([
-            'status' => \App\Enums\RoomStatus::Available,
+            'status' => RoomStatus::Available,
         ]);
 
-        \App\Models\ActivityLog::create([
+        ActivityLog::create([
             'user_id' => auth()->id(),
             'action' => 'Check Out',
             'description' => "Memproses check-out untuk reservasi {$reservation->booking_code}.",
@@ -67,7 +72,7 @@ class CheckOutController extends Controller
         dispatch(function () use ($reservation) {
             if ($reservation->guest->email) {
                 try {
-                    \Illuminate\Support\Facades\Mail::to($reservation->guest->email)->send(new \App\Mail\CheckOutNotification($reservation));
+                    Mail::to($reservation->guest->email)->send(new CheckOutNotification($reservation));
                 } catch (\Exception $e) {
                     // Ignore email failure
                 }
@@ -75,9 +80,10 @@ class CheckOutController extends Controller
 
             if ($reservation->guest->phone) {
                 try {
-                    $message = "Yth. Bpk/Ibu *{$reservation->guest->full_name}*,\n\nTerima kasih telah memilih *Tibra Sare Hotel* sebagai akomodasi Anda.\n\nKami menginformasikan bahwa proses Check-Out Anda (Kode: *{$reservation->booking_code}*) telah selesai. Total keseluruhan tagihan Anda adalah *Rp " . number_format($reservation->total_price, 0, ',', '.') . "*.\n\nKami berharap Anda memiliki pengalaman menginap yang menyenangkan dan membawa kenangan indah. Kami selalu menantikan kedatangan Anda kembali di masa mendatang.\n\nHati-hati di jalan, dan semoga hari Anda menyenangkan!\n\nSalam hangat,\n*Manajemen Tibra Sare Hotel*";
-                    \App\Services\WamifyService::sendMessage($reservation->guest->phone, $message);
-                } catch (\Exception $e) {}
+                    $message = "Yth. Bpk/Ibu *{$reservation->guest->full_name}*,\n\nTerima kasih telah memilih *Tibra Sare Hotel* sebagai akomodasi Anda.\n\nKami menginformasikan bahwa proses Check-Out Anda (Kode: *{$reservation->booking_code}*) telah selesai. Total keseluruhan tagihan Anda adalah *Rp ".number_format($reservation->total_price, 0, ',', '.')."*.\n\nKami berharap Anda memiliki pengalaman menginap yang menyenangkan dan membawa kenangan indah. Kami selalu menantikan kedatangan Anda kembali di masa mendatang.\n\nHati-hati di jalan, dan semoga hari Anda menyenangkan!\n\nSalam hangat,\n*Manajemen Tibra Sare Hotel*";
+                    WamifyService::sendMessage($reservation->guest->phone, $message);
+                } catch (\Exception $e) {
+                }
             }
         })->afterResponse();
 
