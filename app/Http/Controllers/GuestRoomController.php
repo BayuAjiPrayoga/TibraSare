@@ -26,7 +26,9 @@ class GuestRoomController extends Controller
     public function show(RoomCategory $roomCategory)
     {
         // Ambil fasilitas dari kamar pertama di kategori ini
-        $facilities = $roomCategory->rooms()->with('facilities')->first()?->facilities ?? collect();
+        /** @var \App\Models\Room|null $firstRoom */
+        $firstRoom = $roomCategory->rooms()->with('facilities')->first();
+        $facilities = $firstRoom ? $firstRoom->facilities : collect();
         
         // Ambil semua galeri foto dari semua kamar di kategori ini
         $images = $roomCategory->rooms()->with('images')->get()->pluck('images')->flatten();
