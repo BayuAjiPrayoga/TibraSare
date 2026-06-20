@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\GoogleCallbackRequest;
+use App\Services\Auth\GoogleAuthService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Socialite\Facades\Socialite;
+
+class GoogleAuthController extends Controller
+{
+    public function redirect(): RedirectResponse
+    {
+        if (
+            blank(config('services.google.client_id'))
+            || blank(config('services.google.client_secret'))
+            || blank(config('services.google.redirect'))
+        ) {
+            return redirect()
+                ->route('login')
+                ->with('status', 'Konfigurasi Google OAuth belum lengkap. Isi GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, dan GOOGLE_REDIRECT_URI di file .env.');
+        }
+
+        return Socialite::driver('google')->stateless()->redirect();
+    }
+
+    public function callback(GoogleCallbackRequest $request, GoogleAuthService $googleAuthService): RedirectResponse
+    {
+        if ($request->validated('error')) {
+            return redirect()
+                ->route('login')
+                ->with('status', $request->validated('error_description') ?: 'Google login dibatalkan.');
+        }
+
+        $googleUser = Socialite::driver('google')->stateless()->user();
+        $user = $googleAuthService->findOrCreateUser($googleUser);
+
+        Auth::login($user, remember: true);
+        $request->session()->regenerate();
+
+        return redirect()->intended(route('dashboard', absolute: false));
+    }
+}

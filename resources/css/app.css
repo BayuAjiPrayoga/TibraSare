@@ -1,0 +1,131 @@
+/* ─── Google Font Import ─── */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Cormorant:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Base Layer ─── */
+@layer base {
+    :root {
+        --color-background: #F8FAFC;
+        --color-foreground: #0F172A;
+        --color-primary: #1E3A8A;
+        --color-primary-foreground: #FFFFFF;
+        --color-accent: #A16207;
+        --color-accent-foreground: #FFFFFF;
+        --color-surface: #FFFFFF;
+        --color-surface-foreground: #0F172A;
+        --color-muted: #F1F5F9;
+        --color-muted-foreground: #64748B;
+        --color-border: #E2E8F0;
+        --color-ring: #1E3A8A;
+        --color-destructive: #DC2626;
+        --color-success: #16A34A;
+        --color-warning: #D97706;
+        --color-info: #0284C7;
+        --radius: 8px;
+    }
+
+    *,
+    *::before,
+    *::after {
+        border-color: var(--color-border);
+    }
+
+    html {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        scroll-behavior: smooth;
+    }
+
+    body {
+        font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+        background-color: var(--color-background);
+        color: var(--color-foreground);
+        font-size: 1rem;
+        line-height: 1.5;
+        touch-action: manipulation;
+    }
+
+    /* Remove default focus outline, add custom */
+    *:focus-visible {
+        outline: 2px solid var(--color-ring);
+        outline-offset: 2px;
+        border-radius: var(--radius);
+    }
+
+    /* Tabular numbers for data */
+    .tabular-nums {
+        font-variant-numeric: tabular-nums;
+    }
+}
+
+/* ─── Component Layer ─── */
+@layer components {
+    /* Page container */
+    .page-container {
+        @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    }
+
+    /* Card base */
+    .card {
+        @apply bg-surface rounded-lg shadow-card border border-slate-200/60;
+    }
+
+    .card-hover {
+        @apply card transition-shadow duration-200 hover:shadow-card-hover;
+    }
+
+    /* Status dots */
+    .status-dot {
+        @apply inline-block w-2 h-2 rounded-full;
+    }
+
+    .status-dot-available   { @apply bg-success; }
+    .status-dot-occupied    { @apply bg-destructive; }
+    .status-dot-reserved    { @apply bg-warning; }
+    .status-dot-maintenance { @apply bg-muted-foreground; }
+
+    /* Glass effect (subtle, for modals/overlays) */
+    .glass {
+        @apply bg-white/80 backdrop-blur-sm border border-white/20;
+    }
+
+    /* Section divider */
+    .section-divider {
+        @apply border-t border-slate-200 my-6;
+    }
+
+    /* Truncate text */
+    .text-truncate {
+        @apply truncate overflow-hidden whitespace-nowrap;
+    }
+}
+
+/* ─── Utility Layer ─── */
+@layer utilities {
+    /* Bottom nav safe area */
+    .pb-safe {
+        padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+    }
+
+    /* Hide scrollbar but keep scroll */
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+        .motion-safe\:animate-slide-up,
+        .motion-safe\:animate-slide-down,
+        .motion-safe\:animate-fade-in,
+        .motion-safe\:animate-scale-in {
+            animation: none;
+        }
+    }
+}
