@@ -59,7 +59,10 @@ class SundaTibraSareSeeder extends Seeder
             $facs = $catData['facilities'];
             unset($catData['facilities']);
 
-            $category = RoomCategory::create($catData);
+            $category = RoomCategory::updateOrCreate(
+                ['name' => $catData['name']],
+                $catData
+            );
 
             // Create Rooms for this category
             // Saung Alit: 8 rooms, Bumi Pasundan: 5 rooms, Puri Parahyangan: 2 rooms
@@ -67,13 +70,17 @@ class SundaTibraSareSeeder extends Seeder
             $prefix = $index === 0 ? 'SA-' : ($index === 1 ? 'BP-' : 'PP-');
 
             for ($i = 1; $i <= $roomCount; $i++) {
-                $room = Room::create([
-                    'room_category_id' => $category->id,
-                    'room_number' => $prefix.(100 + $i),
-                    'price' => $category->base_price,
-                    'status' => RoomStatus::Available,
-                    'description' => 'Kamar '.$category->name.' nomor '.(100 + $i),
-                ]);
+                $room = Room::updateOrCreate(
+                    [
+                        'room_number' => $prefix.(100 + $i),
+                    ],
+                    [
+                        'room_category_id' => $category->id,
+                        'price' => $category->base_price,
+                        'status' => RoomStatus::Available,
+                        'description' => 'Kamar '.$category->name.' nomor '.(100 + $i),
+                    ]
+                );
 
                 // Sync Facilities
                 $syncIds = [];
@@ -83,7 +90,7 @@ class SundaTibraSareSeeder extends Seeder
                 $room->facilities()->sync($syncIds);
 
                 // Create Image for the room (using the same category image for demo)
-                RoomImage::create([
+                RoomImage::firstOrCreate([
                     'room_id' => $room->id,
                     'image_path' => $category->image_path,
                 ]);
