@@ -47,10 +47,11 @@
                     :title="$title ?? null"
                     :user="$user"
                     :hide-menu="$isGuest"
+                    :back-url="isset($backUrl) ? $backUrl : null"
                 />
 
                 {{-- Page Content --}}
-                <main class="flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-6">
+                <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-8">
                     {{-- Flash Messages via SweetAlert2 --}}
                     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
                     @if(session('success'))
@@ -85,10 +86,14 @@
                 </main>
             </div>
 
-            {{-- Mobile Bottom Navigation (hidden for guest role) --}}
-            @unless($isGuest)
+            {{-- Mobile Bottom Navigation --}}
+            @if($isGuest)
+                @unless(request()->routeIs('guest.rooms.show') || request()->routeIs('book.create') || request()->routeIs('book.store'))
+                    <x-guest-bottom-nav />
+                @endunless
+            @else
                 <x-bottom-nav />
-            @endunless
+            @endif
         </div>
 
         {{-- Page-specific scripts --}}

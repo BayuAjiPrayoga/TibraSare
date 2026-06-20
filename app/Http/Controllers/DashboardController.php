@@ -10,18 +10,22 @@ use App\Models\Guest;
 use App\Models\Reservation;
 use App\Models\Room;
 use App\Models\RoomCategory;
+use App\Models\User;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
     public function index(): View
     {
-        if (auth()->user()->role->value === UserRole::Guest->value) {
+        /** @var User $authUser */
+        $authUser = auth()->user();
+
+        if ($authUser->role === UserRole::Guest) {
             $myReservations = Reservation::with('room.category')
                 ->where('created_by', auth()->id())
                 ->latest()
                 ->get()
-                ->map(function ($res) {
+                ->map(function (Reservation $res): array {
                     return [
                         'id' => $res->id,
                         'booking_code' => $res->booking_code,
@@ -64,16 +68,16 @@ class DashboardController extends Controller
             ->latest()
             ->take(5)
             ->get()
-            ->map(function ($log) {
+            ->map(function (ActivityLog $log): array {
                 return [
                     'action' => $log->action,
                     'user' => ['name' => $log->user->name ?? 'System'],
-                    'time_ago' => $log->created_at->diffForHumans(),
+                    'time_ago' => $log->created_at?->diffForHumans(),
                 ];
             });
 
         // Revenue Chart Data (Last 6 Months)
-        $revenueData = collect(range(5, 0))->map(function ($i) {
+        $revenueData = collect(range(5, 0))->map(function (int $i): array {
             $date = now()->subMonths($i);
             $total = Reservation::whereMonth('created_at', $date->month)
                 ->whereYear('created_at', $date->year)

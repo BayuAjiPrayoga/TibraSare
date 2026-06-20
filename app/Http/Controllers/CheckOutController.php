@@ -9,6 +9,7 @@ use App\Models\ActivityLog;
 use App\Models\Reservation;
 use App\Services\WamifyService;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
@@ -22,7 +23,7 @@ class CheckOutController extends Controller
             ->where('status', ReservationStatus::CheckedIn)
             ->whereDate('check_out_date', '<=', $today)
             ->get()
-            ->map(function ($res) {
+            ->map(function (Reservation $res): array {
                 return [
                     'id' => $res->id,
                     'booking_code' => $res->booking_code,
@@ -47,7 +48,7 @@ class CheckOutController extends Controller
         ]);
     }
 
-    public function store(Reservation $reservation)
+    public function store(Reservation $reservation): RedirectResponse
     {
         if ($reservation->status !== ReservationStatus::CheckedIn) {
             return back()->with('error', 'Reservasi ini tidak dapat di-check-out.');
@@ -80,7 +81,8 @@ class CheckOutController extends Controller
 
             if ($reservation->guest->phone) {
                 try {
-                    $message = "Yth. Bpk/Ibu *{$reservation->guest->full_name}*,\n\nTerima kasih telah memilih *Tibra Sare Hotel* sebagai akomodasi Anda.\n\nKami menginformasikan bahwa proses Check-Out Anda (Kode: *{$reservation->booking_code}*) telah selesai. Total keseluruhan tagihan Anda adalah *Rp ".number_format($reservation->total_price, 0, ',', '.')."*.\n\nKami berharap Anda memiliki pengalaman menginap yang menyenangkan dan membawa kenangan indah. Kami selalu menantikan kedatangan Anda kembali di masa mendatang.\n\nHati-hati di jalan, dan semoga hari Anda menyenangkan!\n\nSalam hangat,\n*Manajemen Tibra Sare Hotel*";
+                    $totalPrice = (float) $reservation->total_price;
+                    $message = "Yth. Bpk/Ibu *{$reservation->guest->full_name}*,\n\nTerima kasih telah memilih *Tibra Sare Hotel* sebagai akomodasi Anda.\n\nKami menginformasikan bahwa proses Check-Out Anda (Kode: *{$reservation->booking_code}*) telah selesai. Total keseluruhan tagihan Anda adalah *Rp ".number_format($totalPrice, 0, ',', '.')."*.\n\nKami berharap Anda memiliki pengalaman menginap yang menyenangkan dan membawa kenangan indah. Kami selalu menantikan kedatangan Anda kembali di masa mendatang.\n\nHati-hati di jalan, dan semoga hari Anda menyenangkan!\n\nSalam hangat,\n*Manajemen Tibra Sare Hotel*";
                     WamifyService::sendMessage($reservation->guest->phone, $message);
                 } catch (\Exception $e) {
                 }

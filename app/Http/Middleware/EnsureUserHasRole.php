@@ -21,12 +21,11 @@ class EnsureUserHasRole
         }
 
         $allowedRoles = collect($roles)
-            ->map(fn (string $role): string => UserRole::tryFrom($role)?->value ?? $role)
+            ->map(fn (string $role): string => UserRole::tryFrom($role)->value ?? $role)
             ->all();
 
-        // In Laravel, the $user->role is cast to an App\Enums\UserRole instance if configured in User model.
-        // We ensure we get the string value for comparison.
-        $userRoleValue = $user->role instanceof UserRole ? $user->role->value : $user->role;
+        /** @var \App\Models\User $user */
+        $userRoleValue = $user->role->value;
 
         if (!in_array($userRoleValue, $allowedRoles, true)) {
             abort(Response::HTTP_FORBIDDEN);

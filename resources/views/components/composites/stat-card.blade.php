@@ -18,7 +18,9 @@ $iconBgMap = [
 ];
 @endphp
 
-<div {{ $attributes->merge(['class' => 'card p-4 flex items-start gap-3']) }}>
+<div {{ $attributes->merge(['class' => 'card p-4 flex items-start gap-3 group hover:shadow-md hover:-translate-y-1 hover:border-primary/20 transition-all duration-300 relative overflow-hidden']) }}>
+    {{-- Subtle decorative glow on hover --}}
+    <div class="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-slate-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
     @if($icon)
         <div class="p-2.5 rounded-lg shrink-0 {{ $iconBgMap[$color] ?? $iconBgMap['primary'] }}">
             <x-icon :name="$icon" class="h-5 w-5" />

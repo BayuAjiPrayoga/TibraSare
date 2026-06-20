@@ -6,6 +6,7 @@ use App\Models\Facility;
 use App\Models\Room;
 use App\Models\RoomCategory;
 use App\Models\RoomImage;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -22,18 +23,18 @@ class RoomController extends Controller
             $roomsQuery->where('room_number', 'like', "%{$search}%");
         }
 
-        $rooms = $roomsQuery->paginate(12)->withQueryString()->through(function ($room) {
+        $rooms = $roomsQuery->paginate(12)->withQueryString()->through(function (Room $room): array {
             return [
                 'id' => $room->id,
                 'room_number' => $room->room_number,
                 'status' => $room->status->value,
                 'price' => (int) $room->price,
-                'category_id' => $room->category_id,
+                'category_id' => $room->room_category_id,
                 'category' => [
                     'name' => $room->category->name ?? '-',
                 ],
                 'facilities' => $room->facilities->pluck('id')->toArray(),
-                'images' => $room->images->map(fn ($img) => ['id' => $img->id, 'url' => asset('storage/'.$img->image_path)])->toArray(),
+                'images' => $room->images->map(fn (RoomImage $img): array => ['id' => $img->id, 'url' => asset('storage/'.$img->image_path)])->toArray(),
             ];
         });
 
@@ -47,7 +48,7 @@ class RoomController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'room_number' => 'required|string|max:255|unique:rooms',
@@ -74,7 +75,7 @@ class RoomController extends Controller
         return back()->with('success', 'Kamar berhasil ditambahkan.');
     }
 
-    public function update(Request $request, Room $room)
+    public function update(Request $request, Room $room): RedirectResponse
     {
         $validated = $request->validate([
             'room_number' => 'required|string|max:255|unique:rooms,room_number,'.$room->id,
@@ -103,7 +104,7 @@ class RoomController extends Controller
         return back()->with('success', 'Kamar berhasil diperbarui.');
     }
 
-    public function destroy(Room $room)
+    public function destroy(Room $room): RedirectResponse
     {
         foreach ($room->images as $image) {
             Storage::disk('public')->delete($image->image_path);
@@ -115,7 +116,7 @@ class RoomController extends Controller
         return back()->with('success', 'Kamar berhasil dihapus.');
     }
 
-    public function destroyImage(RoomImage $image)
+    public function destroyImage(RoomImage $image): RedirectResponse
     {
         Storage::disk('public')->delete($image->image_path);
         $image->delete();

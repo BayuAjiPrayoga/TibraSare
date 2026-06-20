@@ -9,6 +9,7 @@ use App\Models\ActivityLog;
 use App\Models\Reservation;
 use App\Services\WamifyService;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
@@ -22,7 +23,7 @@ class CheckInController extends Controller
             ->whereIn('status', [ReservationStatus::Reserved])
             ->whereDate('check_in_date', '<=', $today)
             ->get()
-            ->map(function ($res) {
+            ->map(function (Reservation $res): array {
                 return [
                     'id' => $res->id,
                     'booking_code' => $res->booking_code,
@@ -47,7 +48,7 @@ class CheckInController extends Controller
         ]);
     }
 
-    public function store(Reservation $reservation)
+    public function store(Reservation $reservation): RedirectResponse
     {
         if ($reservation->status !== ReservationStatus::Reserved) {
             return back()->with('error', 'Reservasi ini tidak dapat di-check-in.');

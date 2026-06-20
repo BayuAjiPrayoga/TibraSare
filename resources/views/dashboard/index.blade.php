@@ -7,10 +7,27 @@
         $user = auth()->user();
     @endphp
 
-    {{-- Greeting --}}
-    <div class="mb-6">
-        <h1 class="text-h1 text-slate-900">{{ $greeting }}, {{ explode(' ', $user->name)[0] }} 👋</h1>
-        <p class="text-body text-muted-foreground mt-0.5">{{ format_date_id(now()) }}</p>
+    {{-- Hero Greeting Banner --}}
+    <div class="relative mb-8 rounded-3xl overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-primary-900 p-8 sm:p-10 shadow-lg">
+        {{-- Decorative background elements --}}
+        <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-primary-500/10 blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 rounded-full bg-blue-500/10 blur-2xl"></div>
+        
+        <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div>
+                <p class="text-primary-200 font-medium tracking-wide text-sm uppercase mb-1">{{ format_date_id(now()) }}</p>
+                <h1 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2">
+                    {{ $greeting }}, <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-200 to-white">{{ explode(' ', $user->name)[0] }}</span> 👋
+                </h1>
+                <p class="text-slate-300 text-sm sm:text-base max-w-xl">
+                    Pantau okupansi kamar, manajemen reservasi tamu, dan kinerja hotel Anda secara menyeluruh.
+                </p>
+            </div>
+            
+            <div class="hidden md:flex shrink-0 p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 items-center justify-center">
+                <x-icon name="building" class="w-12 h-12 text-primary-200" />
+            </div>
+        </div>
     </div>
 
     {{-- Stat Cards --}}

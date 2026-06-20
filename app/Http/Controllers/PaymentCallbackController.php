@@ -42,11 +42,11 @@ class PaymentCallbackController extends Controller
 
         if ($status === 'PAID' || $status === 'SETTLED') {
             // Generate QR Code
-            $qrCodeFileName = 'qrcodes/'.$reservation->booking_code.'.png';
+            $qrCodeFileName = 'qrcodes/'.$reservation->booking_code.'.svg';
             if (!Storage::disk('public')->exists('qrcodes')) {
                 Storage::disk('public')->makeDirectory('qrcodes');
             }
-            $qrImage = QrCode::format('png')->size(300)->generate($reservation->booking_code);
+            $qrImage = QrCode::format('svg')->size(300)->generate($reservation->booking_code);
             Storage::disk('public')->put($qrCodeFileName, $qrImage);
 
             $reservation->update([
@@ -56,7 +56,7 @@ class PaymentCallbackController extends Controller
             Log::info("Reservation {$externalId} marked as PAID with QR Code.");
 
             // Send Invoice Email asynchronously
-            if ($reservation->guest && $reservation->guest->email) {
+            if ($reservation->guest->email) {
                 dispatch(function () use ($reservation) {
                     try {
                         Mail::to($reservation->guest->email)->send(new PaymentSuccess($reservation));

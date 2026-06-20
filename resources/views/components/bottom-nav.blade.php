@@ -4,7 +4,6 @@ $currentPath = '/' . ltrim(request()->path(), '/');
 $userRole = auth()->user()?->role?->value ?? auth()->user()?->role ?? null;
 
 $isActive = function($href) use ($currentPath) {
-    if ($href === '#more') return false;
     if ($href === '/dashboard') return $currentPath === '/dashboard';
     return str_starts_with($currentPath, $href);
 };
@@ -24,7 +23,7 @@ $isActive = function($href) use ($currentPath) {
             @php $active = $isActive($item['href']); @endphp
 
             <a
-                href="{{ $item['href'] === '#more' ? '#' : $item['href'] }}"
+                href="{{ $item['href'] }}"
                 class="flex flex-col items-center justify-center gap-0.5 py-1 px-3 min-w-[64px] transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset rounded-lg {{ $active ? 'text-primary' : 'text-slate-400 hover:text-slate-600' }}"
             >
                 <x-icon :name="$item['icon']" class="h-5 w-5 {{ $active ? 'text-primary' : '' }}" :stroke-width="$active ? '2' : '1.75'" />

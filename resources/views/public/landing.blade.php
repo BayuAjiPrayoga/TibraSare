@@ -45,55 +45,25 @@
     </nav>
 
     {{-- Hero Section --}}
-    <section class="relative min-h-[90vh] flex items-center justify-center pt-20 pb-32">
+    <section class="relative min-h-[100dvh] flex items-center justify-center pt-24 pb-20 lg:pt-32 lg:pb-32 overflow-hidden">
         <div class="absolute inset-0 z-0">
-            <img src="/images/hero.png" alt="Tibra Sare Luxury Resort" class="w-full h-full object-cover" />
-            <div class="absolute inset-0 bg-gradient-to-b from-primary-900/80 via-primary-900/60 to-primary-900/90"></div>
+            <img src="/images/hero.png" alt="Tibra Sare Luxury Resort" class="w-full h-full object-cover object-center" />
+            <div class="absolute inset-0 bg-gradient-to-b from-slate-900/60 via-slate-900/20 to-slate-900/80"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-primary-900/80 via-transparent to-transparent"></div>
         </div>
-        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center mt-12">
-            <div class="flex items-center gap-2 mb-6">
+        <div class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center mt-12 lg:mt-0">
+            <div class="flex items-center gap-2 mb-6 drop-shadow-md">
                 @for($i = 0; $i < 5; $i++)
-                    <svg class="w-4 h-4 text-amber-300 fill-amber-300" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <svg class="w-5 h-5 text-amber-400 fill-amber-400 drop-shadow" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                 @endfor
             </div>
-            <h1 class="text-5xl sm:text-6xl md:text-7xl font-bold text-white leading-tight max-w-4xl tracking-tight">
-                A Symphony of <span class="text-amber-200 italic font-normal">Elegance</span> & Comfort
+            <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight max-w-5xl tracking-tight drop-shadow-xl">
+                A Symphony of <span class="text-amber-300 italic font-medium">Elegance</span> & Nature
             </h1>
-            <p class="mt-6 text-lg text-white/80 max-w-2xl font-light leading-relaxed">
-                Rasakan pengalaman menginap tak terlupakan di jantung kota dengan layanan premium dan pemandangan menakjubkan.
+            <p class="mt-6 text-base sm:text-lg lg:text-xl text-white/90 max-w-2xl font-normal leading-relaxed drop-shadow-md">
+                Rasakan pengalaman menginap tak terlupakan di jantung alam dengan layanan premium dan pemandangan pegunungan menakjubkan.
             </p>
 
-            {{-- Booking Widget --}}
-            <div class="mt-12 w-full max-w-4xl bg-white/10 backdrop-blur-md border border-white/20 p-2 rounded-2xl shadow-2xl">
-                <form class="flex flex-col md:flex-row bg-white rounded-xl overflow-hidden p-2">
-                    <div class="flex-1 flex items-center px-4 py-3 md:py-0 border-b md:border-b-0 md:border-r border-slate-200">
-                        <x-icon name="calendar-check" class="w-5 h-5 text-amber-600 mr-3" />
-                        <div class="flex-1">
-                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Check-In</label>
-                            <input type="date" class="w-full border-0 p-0 text-sm focus:ring-0 text-slate-900 font-medium" />
-                        </div>
-                    </div>
-                    <div class="flex-1 flex items-center px-4 py-3 md:py-0 border-b md:border-b-0 md:border-r border-slate-200">
-                        <x-icon name="calendar-check" class="w-5 h-5 text-amber-600 mr-3" />
-                        <div class="flex-1">
-                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Check-Out</label>
-                            <input type="date" class="w-full border-0 p-0 text-sm focus:ring-0 text-slate-900 font-medium" />
-                        </div>
-                    </div>
-                    <div class="flex-1 flex items-center px-4 py-3 md:py-0">
-                        <x-icon name="users" class="w-5 h-5 text-amber-600 mr-3" />
-                        <div class="flex-1">
-                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Tamu</label>
-                            <select class="w-full border-0 p-0 text-sm focus:ring-0 text-slate-900 font-medium bg-transparent">
-                                <option>1 Dewasa</option><option>2 Dewasa</option><option>2 Dewasa, 1 Anak</option><option>3 Dewasa</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="p-2 md:p-0 md:pl-2">
-                        <a href="#rooms" class="flex items-center justify-center w-full h-full py-4 bg-primary hover:bg-primary-800 text-white rounded-lg whitespace-nowrap px-8 font-medium transition-colors">Cek Ketersediaan</a>
-                    </div>
-                </form>
-            </div>
         </div>
     </section>
 
@@ -163,10 +133,10 @@
                         @endforeach
                     </div>
                 </div>
-                <div class="relative">
+                <div class="relative group cursor-pointer">
                     <div class="aspect-[4/5] rounded-2xl overflow-hidden bg-primary-800 shadow-2xl relative">
-                        <img src="/images/hero.png" alt="Facilities" class="w-full h-full object-cover opacity-60 hover:opacity-100 transition-all duration-700" />
-                        <div class="absolute inset-0 border-2 border-white/10 rounded-2xl m-4"></div>
+                        <img src="/images/hero.png" alt="Facilities" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all duration-700" />
+                        <div class="absolute inset-0 border-2 border-white/10 rounded-2xl m-4 pointer-events-none"></div>
                     </div>
                 </div>
             </div>

@@ -52,7 +52,7 @@ class BookingController extends Controller
         $checkIn = Carbon::parse($validated['check_in_date']);
         $checkOut = Carbon::parse($validated['check_out_date']);
 
-        // Find an available room in this category that has no overlapping reservations
+        /** @var \App\Models\Room|null $room */
         $room = $category->rooms()
             ->where('status', '!=', RoomStatus::Maintenance)
             ->whereDoesntHave('reservations', function ($query) use ($checkIn, $checkOut) {
@@ -66,6 +66,7 @@ class BookingController extends Controller
             return back()->withErrors(['room_id' => 'Maaf, semua kamar pada kategori ini sedang penuh pada tanggal tersebut.']);
         }
 
+        /** @var \App\Models\User $user */
         $user = auth()->user();
         $guest = null;
 
@@ -83,7 +84,7 @@ class BookingController extends Controller
                 );
 
                 $nights = $checkIn->diffInDays($checkOut);
-                $totalPrice = $nights * $room->price;
+                $totalPrice = $nights * (float) $room->price;
 
                 $reservation = Reservation::create([
                     'booking_code' => 'RES-'.strtoupper(uniqid()),
@@ -114,6 +115,8 @@ class BookingController extends Controller
             return back()->with('error', 'Terjadi kesalahan saat memproses reservasi. Silakan coba lagi.');
         }
 
+        /** @var Reservation $reservation */
+        
         // Send Email Notification & WhatsApp Message asynchronously
         dispatch(function () use ($reservation, $guest, $room, $checkIn, $checkOut) {
             if ($guest && $guest->email) {

@@ -1,214 +1,202 @@
 <x-layouts.app>
-    <x-slot name="title">Dashboard</x-slot>
+    <x-slot name="title">Dashboard Tamu</x-slot>
 
     @php $user = auth()->user(); @endphp
 
-    <div class="mb-6">
-        <h1 class="text-h1 text-slate-900">Selamat Datang, {{ explode(' ', $user->name)[0] }} 👋</h1>
-        <p class="text-body text-muted-foreground mt-0.5">Kelola reservasi Anda di sini.</p>
+    {{-- Welcome Header --}}
+    <div class="mb-8 pt-4">
+        <p class="text-sm font-medium text-slate-500 uppercase tracking-wider mb-1">Selamat Datang,</p>
+        <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">{{ explode(' ', $user->name)[0] }} 👋</h1>
     </div>
 
-    <div class="flex items-center justify-between mb-6">
-        <h2 class="text-h3 text-slate-900">Riwayat Pesanan Saya</h2>
-        <a href="#rooms">
-            <x-ui.button variant="outline" size="sm" class="flex-row-reverse" icon="arrow-right">
-                Pesan Kamar Baru
-            </x-ui.button>
-        </a>
-    </div>
+    {{-- Active Reservation Highlight (if any) --}}
+    @php
+        $activeReservations = collect($reservations)->filter(fn($r) => in_array($r['status'], ['reserved', 'checked_in']))->values();
+    @endphp
 
-    @if(count($reservations) > 0)
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16" x-data="{
-            init() {
-                this.$nextTick(() => {
-                    document.querySelectorAll('.qr-container').forEach(el => {
-                        if(el.dataset.code) {
-                            new QRCode(el, {
-                                text: el.dataset.code,
-                                width: 128,
-                                height: 128
+    @if($activeReservations->isNotEmpty())
+        <div class="mb-10">
+            <h2 class="text-lg font-bold text-slate-900 mb-4">Perjalanan Anda Berikutnya</h2>
+            @foreach($activeReservations->take(1) as $res)
+                {{-- Ticket-like Card --}}
+                <div class="lg:max-w-3xl bg-gradient-to-br from-primary-900 to-primary-800 rounded-3xl overflow-hidden shadow-xl text-white relative">
+                    <div class="absolute top-0 right-0 p-4 opacity-10">
+                        <x-icon name="hotel" class="w-24 h-24" />
+                    </div>
+                    <div class="p-6 relative z-10">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/20 uppercase tracking-widest backdrop-blur-sm">
+                                    {{ $res['status'] === 'checked_in' ? 'Sedang Menginap' : 'Akan Datang' }}
+                                </span>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-white/70 font-mono mb-0.5">KODE BOOKING</p>
+                                <p class="text-lg font-bold tracking-wider">{{ $res['booking_code'] }}</p>
+                            </div>
+                        </div>
+
+                        <h3 class="text-2xl font-cormorant font-bold mb-1">{{ $res['room']['category']['name'] }}</h3>
+                        <p class="text-primary-100 text-sm mb-6">Kamar {{ $res['room']['room_number'] }}</p>
+
+                        <div class="grid grid-cols-2 gap-4 border-t border-white/10 pt-4">
+                            <div>
+                                <p class="text-[11px] text-white/60 uppercase tracking-wider mb-1">Check-In</p>
+                                <p class="font-semibold">{{ date('d M Y', strtotime($res['check_in_date'])) }}</p>
+                            </div>
+                            <div>
+                                <p class="text-[11px] text-white/60 uppercase tracking-wider mb-1">Check-Out</p>
+                                <p class="font-semibold">{{ date('d M Y', strtotime($res['check_out_date'])) }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    @if($res['status'] === 'reserved')
+                        <div class="bg-white/10 backdrop-blur-md px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+                            <div class="w-full sm:w-auto">
+                                @if($res['payment_status'] === 'PAID')
+                                    <div class="flex items-center gap-1.5 text-green-300 text-sm font-semibold">
+                                        <x-icon name="check-circle" class="w-4 h-4" /> Lunas
+                                    </div>
+                                @else
+                                    <div class="flex items-center gap-1.5 text-amber-300 text-sm font-semibold">
+                                        <x-icon name="clock" class="w-4 h-4" /> Menunggu Pembayaran
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="w-full sm:w-auto flex justify-end">
+                                @if($res['payment_status'] === 'UNPAID' && $res['payment_url'])
+                                    <a href="{{ $res['payment_url'] }}" target="_blank" class="w-full sm:w-auto text-center bg-white text-primary-900 px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg hover:scale-105 transition-transform">
+                                        Bayar Sekarang
+                                    </a>
+                                @else
+                                    <button onclick="document.getElementById('modal-qr-{{ $res['id'] }}').showModal()" class="w-full sm:w-auto justify-center bg-white/20 hover:bg-white/30 transition text-white px-6 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2">
+                                        <x-icon name="qr-code" class="w-4 h-4" /> Tampilkan QR
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- QR Modal --}}
+                <dialog id="modal-qr-{{ $res['id'] }}" class="backdrop:bg-slate-900/60 p-0 rounded-3xl shadow-2xl overflow-hidden m-auto max-w-sm w-[90%] sm:w-full">
+                    <div class="bg-white p-8 text-center" x-data="{
+                        init() {
+                            this.$nextTick(() => {
+                                new QRCode(this.$refs.qr, {
+                                    text: '{{ $res['booking_code'] }}',
+                                    width: 200,
+                                    height: 200,
+                                    colorDark : '#0F172A',
+                                    colorLight : '#ffffff',
+                                });
                             });
                         }
-                    });
-                });
-            }
-        }">
-            @foreach($reservations as $res)
-                @php
-                    $statusColor = match($res['status']) {
-                        'reserved' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
-                        'checked_in' => 'bg-blue-100 text-blue-800 border-blue-200',
-                        'checked_out' => 'bg-green-100 text-green-800 border-green-200',
-                        'cancelled' => 'bg-red-100 text-red-800 border-red-200',
-                        default => 'bg-slate-100 text-slate-800 border-slate-200'
-                    };
-                    $statusLabel = match($res['status']) {
-                        'reserved' => 'Dipesan',
-                        'checked_in' => 'Check-In',
-                        'checked_out' => 'Selesai',
-                        'cancelled' => 'Dibatalkan',
-                        default => $res['status']
-                    };
-                @endphp
-                <div class="card p-5 hover:shadow-lg transition-shadow">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="bg-primary-50 p-2 rounded-lg text-primary-700">
-                            <x-icon name="hotel" class="w-5 h-5" />
+                    }">
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">Check-In QR Code</h3>
+                        <p class="text-slate-500 text-sm mb-8">Tunjukkan QR code ini kepada resepsionis saat kedatangan Anda.</p>
+                        <div class="flex justify-center mb-8">
+                            <div class="p-4 bg-white border-2 border-slate-100 rounded-2xl shadow-sm" x-ref="qr"></div>
                         </div>
-                        <span class="px-2.5 py-1 rounded-full text-xs font-medium border {{ $statusColor }}">
-                            {{ $statusLabel }}
-                        </span>
-                        @if($res['payment_status'] === 'PAID')
-                            <span class="px-2.5 py-1 rounded-full text-xs font-medium border bg-green-100 text-green-800 border-green-200 ml-2">
-                                LUNAS
-                            </span>
-                        @endif
+                        <p class="font-mono text-lg font-bold tracking-widest text-primary-700 mb-8">{{ $res['booking_code'] }}</p>
+                        <button onclick="document.getElementById('modal-qr-{{ $res['id'] }}').close()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition-colors">
+                            Tutup
+                        </button>
                     </div>
-                    
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h3 class="font-semibold text-lg text-slate-900 mb-1">
-                                {{ $res['room']['category']['name'] }} (Kamar {{ $res['room']['room_number'] }})
-                            </h3>
-                            <p class="text-sm text-slate-500 font-mono">ID: {{ $res['booking_code'] }}</p>
-                        </div>
-                        <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-sm" title="Tunjukkan QR ini saat Check-In">
-                            <div class="qr-container w-[128px] h-[128px]" data-code="{{ $res['booking_code'] }}"></div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-3 bg-slate-50 rounded-lg p-3 text-sm">
-                        <div class="flex items-center gap-2 text-slate-600">
-                            <x-icon name="calendar-days" class="w-4 h-4 text-slate-400" />
-                            <span>{{ date('d M Y', strtotime($res['check_in_date'])) }} s/d {{ date('d M Y', strtotime($res['check_out_date'])) }}</span>
-                        </div>
-                        <div class="flex justify-between items-center pt-2 border-t border-slate-200">
-                            <span class="text-slate-500">Total Harga</span>
-                            <span class="font-bold text-primary-700">{{ format_currency($res['total_price']) }}</span>
-                        </div>
-                        
-                        @if($res['status'] === 'reserved')
-                        <div class="pt-3 mt-3 border-t border-slate-200 text-right">
-                            <form action="{{ route('reservations.cancel', $res['id']) }}" method="POST" class="inline-block" onsubmit="return confirmCancel(event)">
-                                @csrf
-                                <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-1 transition-colors">
-                                    <x-icon name="trash-2" class="w-4 h-4" /> Batalkan
-                                </button>
-                            </form>
-                            @if($res['payment_status'] === 'UNPAID' && $res['payment_url'])
-                                <a href="{{ $res['payment_url'] }}" target="_blank" class="text-primary-600 hover:text-primary-800 text-sm font-medium flex items-center gap-1 transition-colors ml-4 inline-flex">
-                                    <x-icon name="credit-card" class="w-4 h-4" /> Bayar Sekarang
-                                </a>
-                            @endif
-                        </div>
-                        @endif
-                    </div>
-                </div>
+                </dialog>
             @endforeach
         </div>
     @else
-        <div class="text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm mb-16">
-            <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <x-icon name="hotel" class="w-8 h-8 text-slate-400" />
+        <div class="lg:max-w-3xl mb-10 text-center py-12 px-4 bg-white rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-primary-50 to-white"></div>
+            <div class="relative z-10">
+                <div class="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                    <x-icon name="hotel" class="w-10 h-10 text-primary-600" />
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2">Belum ada pesanan aktif</h3>
+                <p class="text-slate-500 mb-8 max-w-sm mx-auto">Waktunya merencanakan liburan impian Anda bersama keluarga tercinta.</p>
+                <a href="#rooms" class="inline-block bg-primary hover:bg-primary-800 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-primary/30 transition-all hover:-translate-y-0.5">
+                    Cari Kamar Sekarang
+                </a>
             </div>
-            <h3 class="text-lg font-medium text-slate-900 mb-2">Belum ada pesanan</h3>
-            <p class="text-slate-500 mb-6">Anda belum pernah melakukan pemesanan kamar.</p>
-            <a href="#rooms">
-                <x-ui.button>Pesan Kamar Sekarang</x-ui.button>
-            </a>
         </div>
     @endif
 
-    {{-- Jelajahi Kamar --}}
-    <div id="rooms" class="mt-16 mb-8 border-t border-slate-200 pt-12">
-        <div class="flex items-center justify-between mb-8">
-            <div>
-                <h2 class="text-h3 text-slate-900">Jelajahi Kamar</h2>
-                <p class="text-body text-slate-500 mt-1">Temukan kamar yang sesuai untuk kenyamanan Anda berikutnya.</p>
-            </div>
+    {{-- Horizontal Scroll for Room Exploration --}}
+    <div id="rooms" class="mb-12">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-slate-900">Eksplorasi Kamar</h2>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <div class="flex overflow-x-auto pb-6 -mx-4 px-4 sm:mx-0 sm:px-0 gap-4 lg:gap-6 snap-x hide-scrollbar">
             @forelse($roomCategories as $category)
-                <div class="group rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300">
-                    <div class="relative h-48 overflow-hidden bg-slate-100">
+                <div class="min-w-[280px] w-[280px] sm:min-w-[320px] bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden snap-start flex flex-col group hover:shadow-md transition-all">
+                    <div class="h-44 relative overflow-hidden bg-slate-100">
                         @if($category->image_path)
-                            <img 
-                                src="{{ \Illuminate\Support\Facades\Storage::url($category->image_path) }}" 
-                                alt="{{ $category->name }}" 
-                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                            />
+                            <img src="{{ \Illuminate\Support\Facades\Storage::url($category->image_path) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                         @else
-                            <div class="w-full h-full flex items-center justify-center">
-                                <x-icon name="hotel" class="w-10 h-10 text-slate-300" />
-                            </div>
+                            <div class="w-full h-full flex items-center justify-center"><x-icon name="image" class="w-8 h-8 text-slate-300" /></div>
                         @endif
-                        <div class="absolute top-3 right-3 bg-white/90 backdrop-blur px-2.5 py-1 rounded-full text-xs font-semibold text-primary shadow-sm">
-                            Dari {{ format_currency($category->base_price) }}
+                        <div class="absolute top-3 right-3 bg-white/90 backdrop-blur px-3 py-1.5 rounded-full text-xs font-bold text-slate-900 shadow-sm">
+                            {{ format_currency($category->base_price) }}
                         </div>
-                        @if($category->available_rooms_count === 0)
-                            <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center">
-                                <div class="bg-white/90 px-4 py-2 rounded-lg font-bold text-slate-900 shadow-lg border border-slate-200 transform -rotate-12">
-                                    SOLD OUT
-                                </div>
-                            </div>
-                        @endif
                     </div>
-                    <div class="p-5">
+                    <div class="p-5 flex-1 flex flex-col">
                         <div class="flex justify-between items-start mb-2">
-                            <h3 class="text-xl font-cormorant font-bold text-slate-900">{{ $category->name }}</h3>
-                            <span class="text-xs font-medium bg-primary-50 text-primary-700 px-2 py-0.5 rounded-full whitespace-nowrap">
-                                {{ $category->available_rooms_count }} Tersedia
-                            </span>
+                            <h3 class="font-cormorant text-xl font-bold text-slate-900">{{ $category->name }}</h3>
                         </div>
-                        <p class="text-slate-600 text-sm line-clamp-2 mb-4 leading-relaxed">
-                            {{ $category->description ?: 'Kamar nyaman dengan fasilitas modern untuk pengalaman menginap yang tak terlupakan bersama keluarga Anda.' }}
-                        </p>
-
-                        @if($category->available_rooms_count > 0)
-                            <a href="{{ route('book.create', $category->id) }}">
-                                <x-ui.button variant="outline" class="w-full border-primary/20 text-primary hover:bg-primary hover:text-white group-hover:border-primary transition-colors">
-                                    Pesan Sekarang <x-icon name="arrow-right" class="w-4 h-4 ml-2" />
-                                </x-ui.button>
-                            </a>
-                        @else
-                            <button class="w-full py-2 px-4 rounded-md font-medium text-sm transition-colors focus:outline-none bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed" disabled>
-                                Kamar Penuh
-                            </button>
-                        @endif
+                        <p class="text-sm text-slate-500 line-clamp-2 mb-6 flex-1">{{ $category->description ?: 'Kamar mewah dengan pemandangan alam memukau.' }}</p>
+                        <a href="{{ route('guest.rooms.show', $category->id) }}" class="block w-full py-2.5 bg-primary-50 hover:bg-primary-100 text-primary-700 text-center rounded-xl text-sm font-bold transition-colors">
+                            Lihat Detail
+                        </a>
                     </div>
                 </div>
             @empty
-                <div class="col-span-3 text-center py-8 text-slate-500">
+                <div class="w-full text-center py-8 text-slate-500 bg-slate-50 rounded-2xl border border-slate-100">
                     Kategori kamar belum tersedia.
                 </div>
             @endforelse
         </div>
     </div>
 
+    {{-- Past Reservations History (if any) --}}
+    @php
+        $pastReservations = collect($reservations)->filter(fn($r) => !in_array($r['status'], ['reserved', 'checked_in']))->values();
+    @endphp
+
+    @if($pastReservations->isNotEmpty())
+        <div class="mb-12">
+            <h2 class="text-lg font-bold text-slate-900 mb-4">Riwayat Perjalanan</h2>
+            <div class="space-y-4">
+                @foreach($pastReservations as $res)
+                    <div class="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm flex items-center gap-4 hover:border-slate-200 transition-colors">
+                        <div class="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center shrink-0">
+                            <x-icon name="history" class="w-5 h-5 text-slate-400" />
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-bold text-slate-900 truncate">{{ $res['room']['category']['name'] }}</h4>
+                            <p class="text-xs text-slate-500 mt-0.5">{{ date('d M Y', strtotime($res['check_in_date'])) }} • {{ format_currency($res['total_price']) }}</p>
+                        </div>
+                        <div>
+                            @if($res['status'] === 'checked_out')
+                                <span class="px-2.5 py-1 bg-green-50 text-green-700 rounded-lg text-[10px] font-bold uppercase tracking-wider">Selesai</span>
+                            @else
+                                <span class="px-2.5 py-1 bg-red-50 text-red-700 rounded-lg text-[10px] font-bold uppercase tracking-wider">Batal</span>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+    <style>
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+
     @push('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script>
-        function confirmCancel(e) {
-            e.preventDefault();
-            const form = e.target;
-            
-            Swal.fire({
-                title: 'Batalkan Reservasi?',
-                text: "Tindakan ini tidak dapat dibatalkan. Jadwal kamar Anda akan otomatis dilepas.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc2626',
-                cancelButtonColor: '#64748b',
-                confirmButtonText: 'Ya, Batalkan!',
-                cancelButtonText: 'Kembali'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
-                }
-            });
-        }
-    </script>
     @endpush
 
 </x-layouts.app>

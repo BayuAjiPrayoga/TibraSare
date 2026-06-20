@@ -4,8 +4,8 @@
 $statusConfig = config("navigation.reservation_status.{$reservation['status']}", config('navigation.reservation_status.reserved'));
 @endphp
 
-<a href="{{ route('reservations.show', $reservation['id']) }}" class="block">
-<div {{ $attributes->merge(['class' => 'card-hover p-4']) }}>
+<a href="{{ route('reservations.show', $reservation['id']) }}" class="block group">
+<div {{ $attributes->merge(['class' => 'card p-4 transition-all duration-300 group-hover:shadow-md group-hover:-translate-y-1 group-hover:border-primary/20']) }}>
     {{-- Top Row: Booking Code + Status --}}
     <div class="flex items-center justify-between mb-3">
         <span class="text-caption font-semibold text-primary tabular-nums">

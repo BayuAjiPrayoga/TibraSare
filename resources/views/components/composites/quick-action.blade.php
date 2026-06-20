@@ -15,7 +15,7 @@ $colorMap = [
 ];
 
 $baseClass = implode(' ', [
-    'flex flex-col items-center p-3 rounded-xl transition-colors duration-200 cursor-pointer',
+    'flex flex-col items-center p-3 rounded-2xl transition-all duration-300 cursor-pointer group hover:scale-105 hover:shadow-lg',
     'focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
     $colorMap[$color] ?? $colorMap['primary'],
 ]);

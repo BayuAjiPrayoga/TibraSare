@@ -23,7 +23,10 @@ class GoogleAuthController extends Controller
                 ->with('status', 'Konfigurasi Google OAuth belum lengkap. Isi GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, dan GOOGLE_REDIRECT_URI di file .env.');
         }
 
-        return Socialite::driver('google')->stateless()->redirect();
+        /** @var \Laravel\Socialite\Two\GoogleProvider $driver */
+        $driver = Socialite::driver('google');
+
+        return $driver->stateless()->redirect();
     }
 
     public function callback(GoogleCallbackRequest $request, GoogleAuthService $googleAuthService): RedirectResponse
@@ -34,7 +37,9 @@ class GoogleAuthController extends Controller
                 ->with('status', $request->validated('error_description') ?: 'Google login dibatalkan.');
         }
 
-        $googleUser = Socialite::driver('google')->stateless()->user();
+        /** @var \Laravel\Socialite\Two\GoogleProvider $driver */
+        $driver = Socialite::driver('google');
+        $googleUser = $driver->stateless()->user();
         $user = $googleAuthService->findOrCreateUser($googleUser);
 
         Auth::login($user, remember: true);

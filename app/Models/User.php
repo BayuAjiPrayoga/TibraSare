@@ -4,12 +4,29 @@ namespace App\Models;
 
 use App\Enums\UserRole;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Carbon\Carbon;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $email
+ * @property Carbon|null $email_verified_at
+ * @property UserRole $role
+ * @property string|null $google_id
+ * @property string $password
+ * @property string|null $avatar
+ * @property string|null $remember_token
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Collection<int, Reservation> $reservations
+ * @property-read Collection<int, ActivityLog> $activityLogs
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */

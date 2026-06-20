@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\RoomStatus;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +12,22 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property int $id
+ * @property int $room_category_id
+ * @property string $room_number
+ * @property int|null $floor
+ * @property string $price
+ * @property RoomStatus $status
+ * @property string|null $description
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
+ * @property-read RoomCategory $category
+ * @property-read Collection<int, Facility> $facilities
+ * @property-read Collection<int, Reservation> $reservations
+ * @property-read Collection<int, RoomImage> $images
+ */
 class Room extends Model
 {
     use HasFactory;

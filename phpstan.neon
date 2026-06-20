@@ -1,16 +1,11 @@
 includes:
-    - vendor/nunomaduro/larastan/extension.neon
+    - vendor/larastan/larastan/extension.neon
 
 parameters:
     paths:
         - app/
 
-    # Level 5 is a good balance for existing projects
     level: 5
 
-    ignoreErrors:
-        # Ignore some common dynamic magic method calls if needed
-        # - '#Call to an undefined method [a-zA-Z0-9\\_]+::[a-zA-Z0-9_]+\(\)#'
-
     excludePaths:
-        - ./*/*/FileToBeExcluded.php
+        - app/Providers/TelescopeServiceProvider.php

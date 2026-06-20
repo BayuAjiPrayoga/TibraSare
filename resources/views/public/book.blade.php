@@ -24,8 +24,8 @@
                 <h1 class="text-h2 text-slate-900">Pesan Kamar</h1>
                 <p class="text-body text-slate-500 mt-1">Selesaikan pemesanan Anda untuk kamar {{ $category->name }}.</p>
             </div>
-            <a href="/">
-                <x-ui.button variant="ghost" size="sm" icon="arrow-left">Kembali ke Beranda</x-ui.button>
+            <a href="{{ route('guest.rooms.show', $category->id) }}">
+                <x-ui.button variant="ghost" size="sm" icon="arrow-left">Kembali ke Kamar</x-ui.button>
             </a>
         </div>
 

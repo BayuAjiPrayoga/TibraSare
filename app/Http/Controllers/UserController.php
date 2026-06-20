@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -21,13 +22,13 @@ class UserController extends Controller
                 ->orWhere('email', 'like', "%{$search}%");
         }
 
-        $users = $query->paginate(12)->withQueryString()->through(function ($user) {
+        $users = $query->paginate(12)->withQueryString()->through(function (User $user): array {
             return [
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role->value,
-                'created_at' => $user->created_at->format('d M Y'),
+                'created_at' => $user->created_at?->format('d M Y'),
             ];
         });
 
@@ -36,7 +37,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -52,7 +53,7 @@ class UserController extends Controller
         return back()->with('success', 'Pengguna berhasil ditambahkan.');
     }
 
-    public function update(Request $request, User $user)
+    public function update(Request $request, User $user): RedirectResponse
     {
         $rules = [
             'name' => 'required|string|max:255',
@@ -77,7 +78,7 @@ class UserController extends Controller
         return back()->with('success', 'Data pengguna berhasil diperbarui.');
     }
 
-    public function destroy(User $user)
+    public function destroy(User $user): RedirectResponse
     {
         // Prevent deleting oneself
         if (auth()->id() === $user->id) {

@@ -10,8 +10,10 @@ use App\Models\ActivityLog;
 use App\Models\Guest;
 use App\Models\Reservation;
 use App\Models\Room;
+use App\Models\User;
 use App\Services\XenditService;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
@@ -31,7 +33,7 @@ class ReservationController extends Controller
                 });
         }
 
-        $reservations = $query->paginate(12)->withQueryString()->through(function ($res) {
+        $reservations = $query->paginate(12)->withQueryString()->through(function (Reservation $res): array {
             return [
                 'id' => $res->id,
                 'booking_code' => $res->booking_code,
@@ -59,7 +61,7 @@ class ReservationController extends Controller
     public function create(): View
     {
         // Simple logic to pass available rooms for the wizard
-        $availableRooms = Room::with('category')->where('status', 'available')->get()->map(function ($room) {
+        $availableRooms = Room::with('category')->where('status', 'available')->get()->map(function (Room $room): array {
             return [
                 'id' => $room->id,
                 'room_number' => $room->room_number,
@@ -87,7 +89,7 @@ class ReservationController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'room_id' => 'required|exists:rooms,id',
@@ -123,7 +125,7 @@ class ReservationController extends Controller
         $checkIn = Carbon::parse($validated['check_in_date']);
         $checkOut = Carbon::parse($validated['check_out_date']);
         $nights = $checkIn->diffInDays($checkOut);
-        $totalPrice = $nights * $room->price;
+        $totalPrice = $nights * (float) $room->price;
 
         $reservation = Reservation::create([
             'booking_code' => 'RES-'.strtoupper(uniqid()),
@@ -161,28 +163,33 @@ class ReservationController extends Controller
         $xenditService = new XenditService();
         $guestObj = Guest::find($guestId);
 
-        $invoice = $xenditService->createInvoice([
-            'external_id' => $reservation->booking_code,
-            'amount' => $reservation->total_price,
-            'description' => 'Reservasi Kamar '.$room->room_number.' ('.$room->category->name.')',
-            'payer_email' => $guestObj->email,
-            'customer_name' => $guestObj->full_name,
-            'customer_phone' => $guestObj->phone,
-        ]);
+        if ($guestObj) {
+            $invoice = $xenditService->createInvoice([
+                'external_id' => $reservation->booking_code,
+                'amount' => $reservation->total_price,
+                'description' => 'Reservasi Kamar '.$room->room_number.' ('.$room->category->name.')',
+                'payer_email' => $guestObj->email,
+                'customer_name' => $guestObj->full_name,
+                'customer_phone' => $guestObj->phone,
+            ]);
 
-        if ($invoice && isset($invoice['invoice_url'])) {
-            $reservation->update(['payment_url' => $invoice['invoice_url']]);
+            if ($invoice && isset($invoice['invoice_url'])) {
+                $reservation->update(['payment_url' => $invoice['invoice_url']]);
 
-            return redirect($invoice['invoice_url']);
+                return redirect($invoice['invoice_url']);
+            }
         }
 
         return redirect()->route('reservations.index')->with('success', 'Reservasi berhasil dibuat. Namun sistem pembayaran sedang gangguan.');
     }
 
-    public function cancel(Request $request, Reservation $reservation)
+    public function cancel(Request $request, Reservation $reservation): RedirectResponse
     {
+        /** @var User $authUser */
+        $authUser = auth()->user();
+
         // Pastikan hanya tamu yang bersangkutan atau admin yang bisa membatalkan
-        if (auth()->user()->role?->value !== 'admin' && $reservation->guest->email !== auth()->user()->email) {
+        if ($authUser->role->value !== 'admin' && $reservation->guest->email !== $authUser->email) {
             return back()->with('error', 'Anda tidak berhak membatalkan reservasi ini.');
         }
 

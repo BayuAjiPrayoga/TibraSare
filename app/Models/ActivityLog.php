@@ -2,10 +2,23 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int|null $user_id
+ * @property string $action
+ * @property string|null $description
+ * @property array<string, mixed>|null $properties
+ * @property string|null $ip_address
+ * @property string|null $user_agent
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read User|null $user
+ */
 class ActivityLog extends Model
 {
     use HasFactory;
@@ -31,7 +44,10 @@ class ActivityLog extends Model
         return $this->belongsTo(User::class);
     }
 
-    public static function log($action, $description = null, $properties = [])
+    /**
+     * @param  array<string, mixed>  $properties
+     */
+    public static function log(string $action, ?string $description = null, array $properties = []): self
     {
         return self::create([
             'user_id' => auth()->id(),
@@ -43,3 +59,4 @@ class ActivityLog extends Model
         ]);
     }
 }
+

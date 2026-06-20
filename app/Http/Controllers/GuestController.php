@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Guest;
+use App\Models\Reservation;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -26,7 +28,7 @@ class GuestController extends Controller
         $guests = $query->latest()
             ->paginate(12)
             ->withQueryString()
-            ->through(function ($guest) {
+            ->through(function (Guest $guest): array {
                 $lastStay = $guest->reservations->first();
                 $status = $lastStay && in_array($lastStay->status->value, ['checked_in', 'in_house']) ? 'in_house' : 'regular';
 
@@ -48,7 +50,7 @@ class GuestController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
@@ -63,7 +65,7 @@ class GuestController extends Controller
         return back()->with('success', 'Data tamu berhasil ditambahkan.');
     }
 
-    public function update(Request $request, Guest $guest)
+    public function update(Request $request, Guest $guest): RedirectResponse
     {
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
@@ -78,7 +80,7 @@ class GuestController extends Controller
         return back()->with('success', 'Data tamu berhasil diperbarui.');
     }
 
-    public function destroy(Guest $guest)
+    public function destroy(Guest $guest): RedirectResponse
     {
         // Prevent deleting if guest has reservations
         if ($guest->reservations()->count() > 0) {

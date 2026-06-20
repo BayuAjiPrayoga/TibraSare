@@ -51,6 +51,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/book/{category}', [BookingController::class, 'create'])->name('book.create');
     Route::post('/book/{category}', [BookingController::class, 'store'])->name('book.store');
     Route::post('/reservations/{reservation}/cancel', [ReservationController::class, 'cancel'])->name('reservations.cancel');
+    Route::get('/guest-rooms', [\App\Http\Controllers\GuestRoomController::class, 'index'])->name('guest.rooms.index');
+    Route::get('/guest-rooms/{roomCategory}', [\App\Http\Controllers\GuestRoomController::class, 'show'])->name('guest.rooms.show');
 
     // Admin-only routes
     Route::middleware(['role:admin'])->group(function () {

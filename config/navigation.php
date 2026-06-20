@@ -49,7 +49,7 @@ return [
         ['label' => 'Dashboard', 'href' => '/dashboard',    'icon' => 'layout-dashboard'],
         ['label' => 'Reservasi', 'href' => '/reservations',  'icon' => 'calendar-check'],
         ['label' => 'Kamar',     'href' => '/rooms',         'icon' => 'bed-double', 'admin_only' => true],
-        ['label' => 'Lainnya',   'href' => '#more',          'icon' => 'menu'],
+        ['label' => 'Profil',    'href' => '/profile',       'icon' => 'user'],
     ],
 
     'room_status' => [
