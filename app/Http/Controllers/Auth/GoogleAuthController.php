@@ -37,10 +37,16 @@ class GoogleAuthController extends Controller
                 ->with('status', $request->validated('error_description') ?: 'Google login dibatalkan.');
         }
 
-        /** @var \Laravel\Socialite\Two\GoogleProvider $driver */
-        $driver = Socialite::driver('google');
-        $googleUser = $driver->stateless()->user();
-        $user = $googleAuthService->findOrCreateUser($googleUser);
+        try {
+            /** @var \Laravel\Socialite\Two\GoogleProvider $driver */
+            $driver = Socialite::driver('google');
+            $googleUser = $driver->stateless()->user();
+            $user = $googleAuthService->findOrCreateUser($googleUser);
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('login')
+                ->with('status', 'Gagal masuk dengan Google. Silakan coba lagi (hindari me-refresh halaman login).');
+        }
 
         Auth::login($user, remember: true);
         $request->session()->regenerate();
