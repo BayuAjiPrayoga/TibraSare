@@ -50,6 +50,11 @@
                     </tbody>
                 </table>
             </div>
+            @if($reportData->hasPages())
+                <div class="p-4 border-t border-slate-100">
+                    {{ $reportData->links() }}
+                </div>
+            @endif
         </div>
     @else
         <x-composites.empty-state icon="bar-chart-3" title="Belum ada data" description="Data laporan akan muncul setelah ada transaksi." />
@@ -58,7 +63,7 @@
     @push('scripts')
     @vite('resources/js/reports.js')
     <script>
-        const reportData = @json($reportData);
+        const reportData = @json($reportData->items());
     </script>
     @endpush
 </x-layouts.app>

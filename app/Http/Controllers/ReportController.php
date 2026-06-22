@@ -20,9 +20,8 @@ class ReportController extends Controller
 
         $reportData = Reservation::with(['guest', 'room.category'])
             ->latest()
-            ->take(50) // Limit to latest 50 for the report MVP
-            ->get()
-            ->map(function ($res) {
+            ->paginate(15) // Batasi 15 data per halaman
+            ->through(function ($res) {
                 return [
                     'id' => $res->id,
                     'booking_code' => $res->booking_code,

@@ -17,9 +17,9 @@
     @if($activeReservations->isNotEmpty())
         <div class="mb-10">
             <h2 class="text-lg font-bold text-slate-900 mb-4">Perjalanan Anda Berikutnya</h2>
-            @foreach($activeReservations->take(1) as $res)
+            @foreach($activeReservations as $res)
                 {{-- Ticket-like Card --}}
-                <div class="lg:max-w-3xl bg-gradient-to-br from-primary-900 to-primary-800 rounded-3xl overflow-hidden shadow-xl text-white relative">
+                <div class="lg:max-w-3xl bg-gradient-to-br from-primary-900 to-primary-800 rounded-3xl overflow-hidden shadow-xl text-white relative mb-6">
                     <div class="absolute top-0 right-0 p-4 opacity-10">
                         <x-icon name="hotel" class="w-24 h-24" />
                     </div>
