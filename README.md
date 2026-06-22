@@ -169,176 +169,72 @@ Tamu Daftar/Login → Pilih Kamar → Isi Form → Redirect Xendit
 
 ### 🖥️ Desktop — Admin & Resepsionis
 
-<details>
-<summary><strong>🔐 Autentikasi</strong></summary>
+#### Autentikasi
 
-#### Halaman Login
+| Halaman Login | Halaman Registrasi |
+|:---:|:---:|
+| ![Login](public/SS%20APP/LOGIN.png) | ![Registrasi](public/SS%20APP/REGISTRASI.png) |
 
-![Login](public/SS%20APP/LOGIN.png)
+#### Dashboard
 
-#### Halaman Registrasi
+| Dashboard Admin | Dashboard Resepsionis |
+|:---:|:---:|
+| ![Dashboard Admin](public/SS%20APP/DASHBOARD%20ADMIN.png) | ![Dashboard Resepsionis](public/SS%20APP/DASHBOARD%20RESEPSIONIS.png) |
+| *Statistik kamar, grafik pendapatan, log aktivitas* | *Ringkasan operasional harian* |
 
-![Registrasi](public/SS%20APP/REGISTRASI.png)
+#### Manajemen Data
 
-</details>
+| Manajemen Kamar | Kategori Kamar | Fasilitas |
+|:---:|:---:|:---:|
+| ![Kamar](public/SS%20APP/MANAGEMEN%20KAMAR.png) | ![Kategori](public/SS%20APP/MANAGEMENT%20KATEGORI%20KAMAR.png) | ![Fasilitas](public/SS%20APP/MANAGEMENT%20FASILITAS.png) |
 
-<details>
-<summary><strong>📊 Dashboard</strong></summary>
+#### Operasional
 
-#### Dashboard Admin
+| Reservasi | Laporan Pendapatan |
+|:---:|:---:|
+| ![Reservasi](public/SS%20APP/RESERVASI.png) | ![Laporan](public/SS%20APP/LAPORAN.png) |
 
-![Dashboard Admin](public/SS%20APP/DASHBOARD%20ADMIN.png)
-*Panel utama admin dengan statistik kamar, grafik pendapatan 6 bulan, dan log aktivitas terkini.*
+| QR Scanner Check-In/Out | Halaman Check-In |
+|:---:|:---:|
+| ![QR Scanner](public/SS%20APP/SCAN%20QR%20CODE%20CEK%20%20IN-OUT.png) | ![Check-In](public/SS%20APP/CEK%20IN.png) |
 
-#### Dashboard Resepsionis
-
-![Dashboard Resepsionis](public/SS%20APP/DASHBOARD%20RESEPSIONIS.png)
-*Panel resepsionis dengan ringkasan operasional harian.*
-
-</details>
-
-<details>
-<summary><strong>🛏️ Manajemen Kamar</strong></summary>
-
-#### Manajemen Kamar
-
-![Manajemen Kamar](public/SS%20APP/MANAGEMEN%20KAMAR.png)
-*CRUD data unit kamar dengan status ketersediaan.*
-
-#### Manajemen Kategori Kamar
-
-![Kategori Kamar](public/SS%20APP/MANAGEMENT%20KATEGORI%20KAMAR.png)
-*Pengelolaan tipe kamar beserta harga dasar dan deskripsi.*
-
-#### Manajemen Fasilitas
-
-![Fasilitas](public/SS%20APP/MANAGEMENT%20FASILITAS.png)
-*CRUD fasilitas hotel yang dapat di-assign ke setiap kamar.*
-
-</details>
-
-<details>
-<summary><strong>📋 Operasional</strong></summary>
-
-#### Daftar Reservasi
-
-![Reservasi](public/SS%20APP/RESERVASI.png)
-*Daftar seluruh reservasi dengan status dan pencarian.*
-
-#### Laporan Pendapatan
-
-![Laporan](public/SS%20APP/LAPORAN.png)
-*Tabel laporan reservasi dengan paginasi dan fitur export PDF/Excel.*
-
-#### Scan QR Code Check-In / Check-Out
-
-![QR Scanner](public/SS%20APP/SCAN%20QR%20CODE%20CEK%20%20IN-OUT.png)
-*Scanner QR Code menggunakan kamera perangkat. Proses check-in/out langsung otomatis tanpa konfirmasi manual.*
-
-#### Halaman Check-In
-
-![Check-In](public/SS%20APP/CEK%20IN.png)
-
-#### Activity Log
-
-![Activity Log](public/SS%20APP/ACTIVITY%20LOG.png)
-*Audit trail seluruh tindakan staf untuk keamanan dan akuntabilitas.*
-
-#### Manajemen Pengguna
-
-![Pengguna](public/SS%20APP/PENGGUNA.png)
-*CRUD data staf hotel dengan pengaturan role (Admin / Resepsionis).*
-
-#### Pengaturan Admin
-
-![Pengaturan](public/SS%20APP/PENGATURAN%20ADMIN.png)
-*Konfigurasi dinamis: nama hotel, alamat, kontak, WiFi, dll.*
-
-</details>
+| Activity Log | Manajemen Pengguna | Pengaturan |
+|:---:|:---:|:---:|
+| ![Activity Log](public/SS%20APP/ACTIVITY%20LOG.png) | ![Pengguna](public/SS%20APP/PENGGUNA.png) | ![Pengaturan](public/SS%20APP/PENGATURAN%20ADMIN.png) |
 
 ---
 
 ### 📱 Mobile — Portal Tamu
 
-<details>
-<summary><strong>🏠 Landing & Eksplorasi</strong></summary>
+#### Landing Page
 
-#### Landing Page (Desktop)
+| Desktop | Mobile |
+|:---:|:---:|
+| ![Landing Desktop](public/SS%20APP/LANDING%20PAGE.png) | ![Landing Mobile](public/SS%20APP/LANDING%20PAGE%20MOBILE%20TAMU.png) |
 
-![Landing Page Desktop](public/SS%20APP/LANDING%20PAGE.png)
-*Hero section dengan navigasi responsif dan showcase kamar.*
+#### Eksplorasi & Detail Kamar
 
-#### Landing Page (Mobile)
+| Daftar Kamar | Detail Kamar |
+|:---:|:---:|
+| ![Kamar](public/SS%20APP/KAMAR%20TAMU.png) | ![Detail](public/SS%20APP/DETAIL%20KAMAR%20TAMU.png) |
 
-![Landing Page Mobile](public/SS%20APP/LANDING%20PAGE%20MOBILE%20TAMU.png)
-*Tampilan mobile-first yang dioptimalkan untuk pengalaman sentuh.*
+#### Booking & Pembayaran
 
-#### Eksplorasi Kamar
+| Form Pemesanan | Payment Gateway | Pembayaran Berhasil |
+|:---:|:---:|:---:|
+| ![Pesan](public/SS%20APP/PESAN%20KAMAR%20TAMU.png) | ![Payment](public/SS%20APP/PAYMENT%20GATEWAY%20TAMU.png) | ![Berhasil](public/SS%20APP/PEMBAYARAN%20BERHASIL%20TAMU.png) |
 
-![Kamar Tamu](public/SS%20APP/KAMAR%20TAMU.png)
-*Daftar kategori kamar dengan harga dan ketersediaan.*
+#### Dashboard & Pengaturan Tamu
 
-#### Detail Kamar
+| Dashboard Tamu | Menu Navigasi | Pengaturan Profil |
+|:---:|:---:|:---:|
+| ![Dashboard](public/SS%20APP/DASHBOARD%20TAMU.png) | ![Menu](public/SS%20APP/MENU%20TAMU.png) | ![Pengaturan](public/SS%20APP/PENGATURAN%20TAMU.png) |
 
-![Detail Kamar](public/SS%20APP/DETAIL%20KAMAR%20TAMU.png)
-*Informasi lengkap kamar dengan galeri foto dan rekomendasi kamar lain.*
+#### Notifikasi
 
-</details>
-
-<details>
-<summary><strong>💳 Booking & Pembayaran</strong></summary>
-
-#### Form Pemesanan Kamar
-
-![Pesan Kamar](public/SS%20APP/PESAN%20KAMAR%20TAMU.png)
-*Formulir pemesanan dengan pemilihan tanggal dan jumlah tamu.*
-
-#### Payment Gateway (Xendit)
-
-![Payment Gateway](public/SS%20APP/PAYMENT%20GATEWAY%20TAMU.png)
-*Halaman pembayaran Xendit dengan berbagai metode (E-Wallet, VA, QRIS).*
-
-#### Pembayaran Berhasil
-
-![Pembayaran Berhasil](public/SS%20APP/PEMBAYARAN%20BERHASIL%20TAMU.png)
-*Konfirmasi pembayaran berhasil dari Xendit.*
-
-</details>
-
-<details>
-<summary><strong>👤 Dashboard & Pengaturan Tamu</strong></summary>
-
-#### Dashboard Tamu
-
-![Dashboard Tamu](public/SS%20APP/DASHBOARD%20TAMU.png)
-*Tiket reservasi aktif dengan QR Code, status pembayaran, dan riwayat perjalanan.*
-
-#### Menu Navigasi Tamu
-
-![Menu Tamu](public/SS%20APP/MENU%20TAMU.png)
-*Bottom navigation bar untuk akses cepat ke fitur utama.*
-
-#### Pengaturan Profil Tamu
-
-![Pengaturan Tamu](public/SS%20APP/PENGATURAN%20TAMU.png)
-*Halaman pengaturan profil: update nama, email, dan foto.*
-
-</details>
-
-<details>
-<summary><strong>📨 Notifikasi</strong></summary>
-
-#### Email Konfirmasi
-
-![Email Konfirmasi](public/SS%20APP/EMAIL%20KONFIRMASI.jpeg)
-*Email otomatis yang dikirim setelah pembayaran berhasil.*
-
-#### WhatsApp Gateway
-
-![WhatsApp Gateway](public/SS%20APP/WHATSAPP%20GATEWAY.jpeg)
-*Notifikasi WhatsApp otomatis saat check-in/check-out.*
-
-</details>
+| Email Konfirmasi | WhatsApp Gateway |
+|:---:|:---:|
+| ![Email](public/SS%20APP/EMAIL%20KONFIRMASI.jpeg) | ![WhatsApp](public/SS%20APP/WHATSAPP%20GATEWAY.jpeg) |
 
 ---
 
