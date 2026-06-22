@@ -130,38 +130,7 @@ Sistem ini mengotomatiskan seluruh siklus hidup reservasi — mulai dari pemesan
 
 ## 🏗 Arsitektur Sistem
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    TAMU (Mobile)                         │
-│  Landing Page → Booking → Xendit Payment → QR Code      │
-└────────────────────────┬────────────────────────────────┘
-                         │ HTTPS
-┌────────────────────────▼────────────────────────────────┐
-│                  Laravel 12 (MVC)                        │
-│  ┌──────────┐ ┌──────────┐ ┌───────────┐ ┌───────────┐ │
-│  │Controller│ │ Service  │ │   Model   │ │   Mail    │ │
-│  │  Layer   │ │  Layer   │ │   Layer   │ │  Classes  │ │
-│  └────┬─────┘ └────┬─────┘ └─────┬─────┘ └─────┬─────┘ │
-│       │             │             │              │       │
-│  ┌────▼─────────────▼─────────────▼──────────────▼────┐ │
-│  │                    MySQL Database                   │ │
-│  └────────────────────────────────────────────────────┘ │
-└─────────┬──────────────────┬──────────────────┬─────────┘
-          │                  │                  │
-   ┌──────▼──────┐   ┌──────▼──────┐   ┌──────▼──────┐
-   │   Xendit    │   │   Wamify    │   │   Google    │
-   │  Webhook    │   │  WhatsApp   │   │   OAuth     │
-   └─────────────┘   └─────────────┘   └─────────────┘
-```
-
-### Alur Bisnis Utama
-
-```
-Tamu Daftar/Login → Pilih Kamar → Isi Form → Redirect Xendit
-  → Bayar → Webhook PAID → Generate QR → Email + WA Notifikasi
-  → Tamu Datang → Scan QR (Auto Check-In) → Menginap
-  → Scan QR (Auto Check-Out) → Selesai
-```
+![Arsitektur dan Proses Bisnis](public/SS%20APP/ARSITEKTUR%20DAN%20PROSES%20BISNIS.png)
 
 ---
 
@@ -198,9 +167,13 @@ Tamu Daftar/Login → Pilih Kamar → Isi Form → Redirect Xendit
 |:---:|:---:|
 | ![QR Scanner](public/SS%20APP/SCAN%20QR%20CODE%20CEK%20%20IN-OUT.png) | ![Check-In](public/SS%20APP/CEK%20IN.png) |
 
-| Activity Log | Manajemen Pengguna | Pengaturan |
-|:---:|:---:|:---:|
-| ![Activity Log](public/SS%20APP/ACTIVITY%20LOG.png) | ![Pengguna](public/SS%20APP/PENGGUNA.png) | ![Pengaturan](public/SS%20APP/PENGATURAN%20ADMIN.png) |
+| Activity Log | Manajemen Pengguna |
+|:---:|:---:|
+| ![Activity Log](public/SS%20APP/ACTIVITY%20LOG.png) | ![Pengguna](public/SS%20APP/PENGGUNA.png) |
+
+| Pengaturan | Menu Navigasi |
+|:---:|:---:|
+| ![Pengaturan](public/SS%20APP/PENGATURAN%20ADMIN.png) | ![Menu](public/SS%20APP/MENU%20TAMU.png) |
 
 ---
 
@@ -226,9 +199,9 @@ Tamu Daftar/Login → Pilih Kamar → Isi Form → Redirect Xendit
 
 #### Dashboard & Pengaturan Tamu
 
-| Dashboard Tamu | Menu Navigasi | Pengaturan Profil |
-|:---:|:---:|:---:|
-| ![Dashboard](public/SS%20APP/DASHBOARD%20TAMU.png) | ![Menu](public/SS%20APP/MENU%20TAMU.png) | ![Pengaturan](public/SS%20APP/PENGATURAN%20TAMU.png) |
+| Dashboard Tamu | Pengaturan Profil |
+|:---:|:---:|
+| ![Dashboard](public/SS%20APP/DASHBOARD%20TAMU.png) | ![Pengaturan](public/SS%20APP/PENGATURAN%20TAMU.png) |
 
 #### Notifikasi
 
