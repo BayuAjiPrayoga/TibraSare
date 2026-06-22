@@ -71,11 +71,18 @@
             margin-top: 50px;
             font-size: 18px;
             font-weight: bold;
-            color: #eab308; /* Yellow/Pending by default since payment gateway is not integrated yet */
-            border: 2px dashed #eab308;
             padding: 10px;
             border-radius: 8px;
             display: inline-block;
+            border: 2px dashed;
+        }
+        .status-paid {
+            color: #16a34a;
+            border-color: #16a34a;
+        }
+        .status-unpaid {
+            color: #eab308;
+            border-color: #eab308;
         }
         .footer {
             margin-top: 50px;
@@ -90,9 +97,12 @@
 <body>
 
     <div class="header">
+        @if(file_exists(public_path('images/IconTS.png')))
+            <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images/IconTS.png'))) }}" alt="Tibra Sare Logo" style="height: 60px; margin-bottom: 10px;">
+        @endif
         <h1>TIBRA SARE HOTEL</h1>
-        <p>Jl. Contoh No. 123, Bandung, Jawa Barat</p>
-        <p>Telepon: (022) 123456 | Email: hello@tibrasare.com</p>
+        <p>Jalan Soekarno-Hatta No. 378, Kota Bandung, Jawa Barat.</p>
+        <p>Telepon: (022) 123456 | Email: tibrasare@luhur.my.id</p>
     </div>
 
     <table class="invoice-details">
@@ -142,13 +152,22 @@
     </table>
 
     <div style="text-align: center;">
-        <div class="status">
+        @if($reservation->payment_status === 'PAID' || $reservation->payment_status === 'SETTLED' || in_array($reservation->status->value, ['Checked In', 'Checked Out']))
+        <div class="status status-paid">
+            STATUS: LUNAS (PAID)
+        </div>
+        <p style="margin-top: 20px; color: #64748b; font-size: 14px;">
+            Pembayaran telah berhasil diverifikasi oleh sistem.
+        </p>
+        @else
+        <div class="status status-unpaid">
             STATUS: MENUNGGU PEMBAYARAN (UNPAID)
         </div>
         <p style="margin-top: 20px; color: #64748b; font-size: 14px;">
-            Sistem pembayaran sedang disiapkan (Integrasi Duitku).<br>
-            Untuk saat ini, silakan selesaikan pembayaran di resepsionis.
+            Sistem menunggu pembayaran Anda.<br>
+            Untuk saat ini, silakan selesaikan pembayaran.
         </p>
+        @endif
     </div>
 
     <div class="footer">
