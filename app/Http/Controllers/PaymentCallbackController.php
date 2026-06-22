@@ -41,6 +41,10 @@ class PaymentCallbackController extends Controller
         }
 
         if ($status === 'PAID' || $status === 'SETTLED') {
+            // Cegah proses ganda jika Xendit mengirim webhook lebih dari sekali
+            if ($reservation->payment_status === 'PAID') {
+                return response()->json(['status' => 'Already Processed']);
+            }
             // Generate QR Code
             $qrCodeFileName = 'qrcodes/'.$reservation->booking_code.'.svg';
             if (!Storage::disk('public')->exists('qrcodes')) {
@@ -67,7 +71,7 @@ class PaymentCallbackController extends Controller
             }
 
         } elseif ($status === 'EXPIRED') {
-            if ($reservation->status === ReservationStatus::Reserved) {
+            if ($reservation->status === ReservationStatus::Reserved && $reservation->payment_status !== 'PAID') {
                 $reservation->update([
                     'payment_status' => 'FAILED',
                     'status' => ReservationStatus::Cancelled,
