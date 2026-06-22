@@ -158,8 +158,12 @@
                     <h4 class="text-white font-semibold mb-6 tracking-wider uppercase text-sm">Kontak Kami</h4>
                     <ul class="space-y-4 text-sm">
                         <li class="flex items-start gap-3">
-                            <x-icon name="edit" class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-                            <span>Jl. Pasir Kaliki No.123, Bandung, Jawa Barat, Indonesia</span>
+                            <x-icon name="map-pin" class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                            <span>Jalan Soekarno-Hatta No. 378, Kota Bandung, Jawa Barat</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <x-icon name="mail" class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                            <span>tibrasare@luhur.my.id</span>
                         </li>
                     </ul>
                 </div>

@@ -26,7 +26,7 @@
                     <div class="p-6 relative z-10">
                         <div class="flex justify-between items-start mb-6">
                             <div>
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/20 uppercase tracking-widest backdrop-blur-sm">
+                                <span class="inline-block whitespace-nowrap px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/20 uppercase tracking-widest backdrop-blur-sm">
                                     {{ $res['status'] === 'checked_in' ? 'Sedang Menginap' : 'Akan Datang' }}
                                 </span>
                             </div>
