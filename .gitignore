@@ -24,3 +24,13 @@ Homestead.yaml
 Thumbs.db
 .agents
 /graphify-out
+
+# Development & AI Notes
+PRD.md
+CONTEXT.md
+DEPLOYMENT.md
+skills-lock.json
+tutor.md
+test_routes.php
+test_views.php
+wamify.json
