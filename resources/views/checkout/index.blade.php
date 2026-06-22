@@ -26,7 +26,21 @@
             this.search = text;
             const match = this.reservations.find(r => r.booking_code === text);
             if (match) {
-                this.openConfirm(match);
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ url('check-out') }}/' + match.id;
+                
+                const csrfToken = '{{ csrf_token() }}';
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = '_token';
+                tokenInput.value = csrfToken;
+                
+                form.appendChild(tokenInput);
+                document.body.appendChild(form);
+                form.submit();
+            } else {
+                alert('Kode QR tidak ditemukan di daftar Check-Out hari ini.');
             }
         }
     }" @qr-scanned.window="handleScanSuccess($event.detail.text)">
