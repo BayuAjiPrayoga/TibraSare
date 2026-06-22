@@ -9,13 +9,11 @@ use App\Models\Room;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Faker\Factory as Faker;
 
 class DummyData1YearSeeder extends Seeder
 {
     public function run(): void
     {
-        $faker = Faker::create('id_ID');
         $rooms = Room::all();
         if ($rooms->isEmpty()) {
             $this->command->warn('Tidak ada kamar. Silakan jalankan seeder utama terlebih dahulu.');
@@ -27,13 +25,26 @@ class DummyData1YearSeeder extends Seeder
 
         $this->command->info('Membuat 50 tamu dummy...');
         $guests = [];
+        
+        $firstNames = ['Budi', 'Siti', 'Agus', 'Ayu', 'Rizky', 'Putri', 'Hendra', 'Dian', 'Tomy', 'Linda', 'Fajar', 'Maya', 'Eko', 'Sari', 'Indra', 'Dewi', 'Andi', 'Nina', 'Gilang', 'Rina'];
+        $lastNames = ['Santoso', 'Wijaya', 'Kusuma', 'Pratama', 'Sari', 'Setiawan', 'Hidayat', 'Saputra', 'Wahyudi', 'Siregar', 'Lestari', 'Nugroho', 'Wibowo', 'Kurniawan', 'Putra'];
+
         for ($i = 0; $i < 50; $i++) {
+            $firstName = $firstNames[array_rand($firstNames)];
+            $lastName = $lastNames[array_rand($lastNames)];
+            $fullName = $firstName . ' ' . $lastName . ' ' . rand(1, 99); // Tambahkan angka untuk mencegah duplikat nama persis
+            $email = strtolower($firstName) . '.' . strtolower($lastName) . $i . '@example.com';
+            $phone = '08' . rand(1111111111, 9999999999);
+            
+            // Generate 16 digit NIK manually
+            $nik = '3273' . str_pad((string)rand(0, 999999999999), 12, '0', STR_PAD_LEFT);
+
             $guests[] = Guest::create([
-                'full_name' => $faker->name,
-                'email' => $faker->unique()->safeEmail,
-                'phone' => $faker->phoneNumber,
+                'full_name' => $fullName,
+                'email' => $email,
+                'phone' => $phone,
                 'identity_type' => 'KTP',
-                'identity_number' => $faker->numerify('3273############'), // 16 digit NIK
+                'identity_number' => $nik,
             ]);
         }
 
