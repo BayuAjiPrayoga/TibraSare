@@ -43,7 +43,6 @@ class DummyData1YearSeeder extends Seeder
                 'full_name' => $fullName,
                 'email' => $email,
                 'phone' => $phone,
-                'identity_type' => 'KTP',
                 'identity_number' => $nik,
             ]);
         }
